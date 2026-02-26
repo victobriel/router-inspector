@@ -1,0 +1,42 @@
+{
+	"manifest_version": 3,
+  "name": "Router Inspector",
+  "version": "1.0",
+  "description": "A Chrome extension to inspect router data and display it in a popup.",
+	"permissions": [
+		"activeTab",
+		"scripting",
+		"downloads",
+		"storage"
+	],
+	"host_permissions": [
+    "http://*/*"
+  ],
+	"content_scripts": [
+		{
+			"matches": [
+        "http://*/*"      ],
+			"js": [
+        "content.js"
+      ],
+			"run_at": "document_idle"
+		}
+	],
+	"web_accessible_resources": [
+		{
+			"resources": ["assets/download.png", "assets/refresh.png", "assets/clear.png"],
+			"matches": [
+        "http://*/*"      ]
+		}
+	],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+		"default_title": "Router Scraping",
+    "default_popup": "popup.html"
+  },
+	"content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self';"
+  }
+}

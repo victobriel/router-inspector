@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="./popup.css" rel="stylesheet">
+	<title>Router Inspector</title>
+</head>
+<body>
+		<!-- HEADER -->
+	 <header class="header">
+		<h1 class="header-title">Router Inspector</h1>
+		<p class="header-sub">ISP Toolkit</p>
+    <span class="version-badge">v1.0</span>
+  </header>
+
+	<!-- STATUS BAR -->
+	<div class="status-bar">
+    <span class="status-dot" id="statusDot"></span>
+    <span class="status-text" id="statusText">Ready</span>
+  </div>
+
+	<!-- MODEL INDICATOR -->
+	<div class="model-bar">
+    <span class="model-label">Model detected:</span>
+    <span class="model-value" id="modelDetected">-</span>
+  </div>
+
+	<!-- CREDENTIALS -->
+  <div class="credentials-section">
+    <p class="section-title">Credentials</p>
+    <div class="credentials-grid">
+      <div class="input-group">
+        <label class="input-label" for="inputUser">User</label>
+        <input class="input-field" type="text" id="inputUser" placeholder="admin" value="admin" autocomplete="off" />
+      </div>
+      <div class="input-group">
+        <label class="input-label" for="inputPass">Password</label>
+        <input class="input-field" type="password" id="inputPass" autocomplete="off" />
+      </div>
+    </div>
+  </div>
+
+	<!-- DATA GRID -->
+  <section class="data-section">
+    <p class="section-title">Data Collected</p>
+    <div class="data-grid">
+      <div class="data-card data-card-full">
+        <p class="card-label">PPPoE</p>
+        <p class="card-value empty" id="val-pppoe">-</p>
+      </div>
+
+      <div class="data-card">
+        <p class="card-label">DNS Primary</p>
+        <p class="card-value empty" id="val-dns1">-</p>
+      </div>
+
+      <div class="data-card">
+        <p class="card-label">DNS Secondary</p>
+        <p class="card-value empty" id="val-dns2">-</p>
+      </div>
+
+      <div class="data-card">
+        <p class="card-label">2.4GHz Channel</p>
+        <p class="card-value empty" id="val-ch24">-</p>
+      </div>
+
+      <div class="data-card">
+        <p class="card-label">5GHz Channel</p>
+        <p class="card-value empty" id="val-ch5">-</p>
+      </div>
+    </div>
+  </section>
+
+	<!-- ACTIONS -->
+  <section class="actions">
+    <button class="btn btn-primary" id="btnCollect">
+      Collect Data
+    </button>
+    <div class="btn-row">
+      <button class="btn btn-export" id="btnExport" disabled>Export CSV</button>
+      <button class="btn btn-clear" id="btnClear">Limpar</button>
+    </div>
+  </section>
+
+	 <!-- LOG -->
+  <section class="log-section">
+    <p class="section-title">Logs</p>
+    <div class="log-panel" id="log"></div>
+  </section>
+
+	<script src="./popup.js"></script>
+</body>
+</html>
