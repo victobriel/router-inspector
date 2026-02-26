@@ -4,15 +4,15 @@ A Chrome extension for automated data extraction from home routers, built for IS
 
 ## Overview
 
-Router Inspector connects to your router's web interface, authenticates automatically, and extracts configuration data (PPPoE credentials, network settings, etc.) into a clean popup UI � with CSV export support.
+Router Inspector connects to your router's web interface, authenticates automatically, and extracts configuration data (PPPoE credentials, network settings, etc.) into a clean popup UI — with CSV export support.
 
 ## Features
 
-- **Automated authentication** � fills and submits router login forms programmatically
-- **Data extraction** � collects WAN configuration, PPPoE credentials, and network status
-- **Retry logic** � handles post-login page redirects gracefully with configurable retry attempts
-- **CSV export** � download collected data for reporting or record-keeping
-- **Injected UI** � adds a "Get Data Automatically" button directly on the router's login page
+- **Automated authentication** — fills and submits router login forms programmatically
+- **Data extraction** — collects WAN configuration, PPPoE credentials, and network status
+- **Retry logic** — handles post-login page redirects gracefully with configurable retry attempts
+- **CSV export** — download collected data for reporting or record-keeping
+- **Injected UI** — adds a "Get Data Automatically" button directly on the router's login page
 
 ## Supported Routers
 
@@ -84,7 +84,7 @@ The compiled extension will be output to the `dist/` directory.
 4. Click **Collect Data**
 5. Once data is collected, click **Export CSV** to download
 
-Alternatively, use the **"Get Data Automatically"** button injected directly on the router's login page � it reads credentials from the login form fields and triggers collection automatically.
+Alternatively, use the **"Get Data Automatically"** button injected directly on the router's login page — it reads credentials from the login form fields and triggers collection automatically.
 
 ## Adding a New Router Driver
 
@@ -111,9 +111,9 @@ export class MyRouterDriver extends Router {
 
 ## Tech Stack
 
-- **TypeScript** � strict mode, `nodenext` modules
-- **esbuild** � fast bundling to IIFE format for Chrome
-- **Zod v4** � runtime schema validation for all messages and extracted data
+- **TypeScript** — strict mode, `nodenext` modules
+- **esbuild** — fast bundling to IIFE format for Chrome
+- **Zod v4** — runtime schema validation for all messages and extracted data
 - **Chrome Extensions Manifest V3**
 
 ## License
