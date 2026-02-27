@@ -36,7 +36,6 @@ export class CollectionService {
 
     return { 
       success: hasData,
-      model: router.name,
       message: 'Data extracted successfully.',
       data
     };

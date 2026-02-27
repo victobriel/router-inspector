@@ -1,9 +1,16 @@
 import { ExtractionResultSchema, type ExtractionResult } from "../domain/schemas/validation.js";
 import { DomService } from "../infra/dom/DomService.js";
 import { PopupView } from "../infra/dom/PopupView.js";
+import { StorageService } from "../infra/storage/StorageService.js";
 
 export class PopupController {
   private currentData: ExtractionResult | null = null;
+  private static readonly LAST_DATA_STORAGE_KEY = 'lastExtractionData';
+  private static readonly UI_STATE_STORAGE_KEY = 'lastPopupUiState';
+  private activeTabId: number | null = null;
+  private persistedStatus: { type: 'ok' | 'warn' | 'err' | ''; text: string } = { type: '', text: 'Ready' };
+  private persistedLogs: Array<{ msg: string; type: 'ok' | 'warn' | 'err' | ''; time: string }> = [];
+
   private static readonly EXPECTED_NAVIGATION_ERROR_SNIPPETS = [
     'message channel closed before a response was received',
     'receiving end does not exist',
@@ -12,12 +19,24 @@ export class PopupController {
 
   constructor() {
     this.setupListeners();
-    this.checkPendingErrors();
+    void this.initialize();
+  }
+
+  private async initialize(): Promise<void> {
+    await this.resolveActiveTab();
+    await this.updateRouterModel();
+    await this.loadPersistedData();
+    await this.loadPersistedUiState();
+    await this.checkPendingErrors();
+  }
+
+  private async resolveActiveTab(): Promise<void> {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    this.activeTabId = tab?.id ?? null;
   }
 
   private setupListeners(): void {
     DomService.getElement('#btnCollect', HTMLElement).addEventListener('click', () => this.handleCollect());
-    DomService.getElement('#btnExport', HTMLElement).addEventListener('click', () => this.handleExport());
     DomService.getElement('#btnClear', HTMLElement).addEventListener('click', () => this.handleClear());
   }
 
@@ -27,8 +46,8 @@ export class PopupController {
 
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     if (!tab?.id) {
-      PopupView.setStatus('err', 'No active tab');
-      PopupView.log("No active tab found", "err");
+      this.setStatus('err', 'No active tab');
+      this.log("No active tab found", "err");
       return;
     }
 
@@ -40,8 +59,8 @@ export class PopupController {
 
       if (!response?.success) {
         const errorMessage = response.message || 'Authentication failed';
-        PopupView.setStatus('warn', errorMessage);
-        PopupView.log(errorMessage, 'warn');
+        this.setStatus('warn', errorMessage);
+        this.log(errorMessage, 'warn');
         return;
       }
 
@@ -56,13 +75,13 @@ export class PopupController {
       const isExpectedNavigationError = this.isExpectedNavigationError(errorMessage);
 
       if (isExpectedNavigationError) {
-        PopupView.log('Router page is redirecting after login. Retrying collection...', 'warn');
+        this.log('Router page is redirecting after login. Retrying collection...', 'warn');
         await this.startRetryLoop(tab.id);
         return;
       }
 
-      PopupView.setStatus('err', 'Communication failed');
-      PopupView.log(errorMessage, 'err');
+      this.setStatus('err', 'Communication failed');
+      this.log(errorMessage, 'err');
     }
   }
 
@@ -70,7 +89,7 @@ export class PopupController {
     const maxRetries = 5;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      PopupView.log(`Retrying collection (${attempt}/${maxRetries})...`);
+      this.log(`Retrying collection (${attempt}/${maxRetries})...`);
 
       try {
         const res = await chrome.tabs.sendMessage(tabId, {
@@ -85,7 +104,7 @@ export class PopupController {
       } catch (error) {
         const message = this.getErrorMessage(error);
         if (!this.isExpectedNavigationError(message)) {
-          PopupView.log(message, 'warn');
+          this.log(message, 'warn');
         }
       }
 
@@ -94,54 +113,162 @@ export class PopupController {
       }
     }
 
-    PopupView.setStatus('err', 'Timeout: Page not ready');
-    PopupView.log('Timeout: Page not ready', 'err');
+    this.setStatus('err', 'Timeout: Page not ready');
+    this.log('Timeout: Page not ready', 'err');
   }
 
   private processResponse(response: any): void {
     const result = ExtractionResultSchema.safeParse({
       ...response.data,
-      model: response.model,
       timestamp: new Date().toISOString()
     });
 
     if (!result.success) {
-      PopupView.setStatus('warn', 'Invalid data format received');
+      this.setStatus('warn', 'Invalid data format received');
       return;
     }
 
     this.currentData = result.data;
     this.renderData();
-    DomService.getElement('#btnExport', HTMLButtonElement).disabled = false;
-    PopupView.setStatus('ok', 'Data collected');
+    void this.persistCurrentData();
+    this.setStatus('ok', 'Data collected');
   }
 
   private renderData(): void {
     if (this.currentData === null) return;
-    
+
     const data = this.currentData;
-    PopupView.updateField('pppoe', data.wan?.ppoeUsername ?? null);
-    
-    DomService.getElement('#modelDetected', HTMLElement).textContent = data.model;
+    PopupView.updateField('pppoeUsername', data.wan?.ppoeUsername ?? null);
+    PopupView.updateField('internetStatus', this.toStatusText(data.wan?.internetStatus));
+    PopupView.updateField('tr069Status', this.toStatusText(data.wan?.tr069Status));
+    PopupView.updateField('ipVersion', data.wan?.ipVersion ?? null);
+    PopupView.updateField('requestPdStatus', this.toStatusText(data.wan?.requestPdStatus));
+    PopupView.updateField('slaacStatus', this.toStatusText(data.wan?.slaacStatus));
+    PopupView.updateField('dhcpv6Status', this.toStatusText(data.wan?.dhcpv6Status));
+    PopupView.updateField('pdStatus', this.toStatusText(data.wan?.pdStatus));
+    PopupView.updateField('linkSpeed', data.wan?.linkSpeed ?? null);
   }
 
   private async checkPendingErrors(): Promise<void> {
-    const store = await chrome.storage.local.get('pendingAuthError');
-    if (store.pendingAuthError) {
-      await chrome.storage.local.remove('pendingAuthError');
-      PopupView.setStatus('warn', String(store.pendingAuthError));
+    const pendingAuthError = await StorageService.get<string>('pendingAuthError');
+    if (pendingAuthError !== null && pendingAuthError !== '') {
+      await StorageService.remove('pendingAuthError');
+      this.setStatus('warn', pendingAuthError);
     }
-  }
-
-  private handleExport(): void {
-    if (this.currentData === null) return;
-    PopupView.log("CSV Exported", "ok");
   }
 
   private handleClear(): void {
     this.currentData = null;
-    PopupView.setStatus('', 'Ready');
-    // Logic to reset all val- fields
+    this.setStatus('', 'Ready');
+    PopupView.updateField('pppoeUsername', null);
+    PopupView.updateField('internetStatus', null);
+    PopupView.updateField('tr069Status', null);
+    PopupView.updateField('ipVersion', null);
+    PopupView.updateField('requestPdStatus', null);
+    PopupView.updateField('slaacStatus', null);
+    PopupView.updateField('dhcpv6Status', null);
+    PopupView.updateField('pdStatus', null);
+    PopupView.updateField('linkSpeed', null);
+    PopupView.clearLogs();
+    this.persistedLogs = [];
+    void this.persistUiState();
+    const storageKey = this.getTabStorageKey(PopupController.LAST_DATA_STORAGE_KEY);
+    if (storageKey !== null) {
+      void StorageService.remove(storageKey);
+    }
+  }
+
+  private async loadPersistedData(): Promise<void> {
+    const storageKey = this.getTabStorageKey(PopupController.LAST_DATA_STORAGE_KEY);
+    if (storageKey === null) return;
+
+    const rawData = await StorageService.get<unknown>(storageKey);
+    if (!rawData) return;
+
+    const parsed = ExtractionResultSchema.safeParse(rawData);
+    if (!parsed.success) {
+      await StorageService.remove(storageKey);
+      return;
+    }
+
+    this.currentData = parsed.data;
+    this.renderData();
+  }
+
+  private async persistCurrentData(): Promise<void> {
+    if (this.currentData === null) return;
+    const storageKey = this.getTabStorageKey(PopupController.LAST_DATA_STORAGE_KEY);
+    if (storageKey === null) return;
+
+    await StorageService.save(storageKey, this.currentData);
+  }
+
+  private async loadPersistedUiState(): Promise<void> {
+    const storageKey = this.getTabStorageKey(PopupController.UI_STATE_STORAGE_KEY);
+    if (storageKey === null) return;
+
+    const state = await StorageService.get<{
+      status?: { type?: string; text?: string };
+      logs?: Array<{ msg?: string; type?: string; time?: string }>;
+    }>(storageKey);
+    if (!state) return;
+
+    const statusType = state.status?.type;
+    const statusText = state.status?.text;
+    if (
+      (statusType === '' || statusType === 'ok' || statusType === 'warn' || statusType === 'err') &&
+      typeof statusText === 'string'
+    ) {
+      this.persistedStatus = { type: statusType, text: statusText };
+      PopupView.setStatus(statusType, statusText);
+    }
+
+    if (Array.isArray(state.logs)) {
+      const logs = state.logs.filter(log =>
+        typeof log?.msg === 'string' &&
+        (log?.type === '' || log?.type === 'ok' || log?.type === 'warn' || log?.type === 'err') &&
+        typeof log?.time === 'string'
+      ) as Array<{ msg: string; type: 'ok' | 'warn' | 'err' | ''; time: string }>;
+
+      this.persistedLogs = logs.slice(0, 50);
+      PopupView.clearLogs();
+      for (let index = this.persistedLogs.length - 1; index >= 0; index--) {
+        const entry = this.persistedLogs[index];
+        if (!entry) continue;
+        PopupView.log(entry.msg, entry.type, entry.time);
+      }
+    }
+  }
+
+  private async persistUiState(): Promise<void> {
+    const storageKey = this.getTabStorageKey(PopupController.UI_STATE_STORAGE_KEY);
+    if (storageKey === null) return;
+
+    await StorageService.save(storageKey, {
+      status: this.persistedStatus,
+      logs: this.persistedLogs
+    });
+  }
+
+  private setStatus(type: 'ok' | 'warn' | 'err' | '', text: string): void {
+    this.persistedStatus = { type, text };
+    PopupView.setStatus(type, text);
+    void this.persistUiState();
+  }
+
+  private log(msg: string, type: 'ok' | 'warn' | 'err' | '' = ''): void {
+    const time = new Date().toLocaleTimeString('en-US', { hour12: false });
+    this.persistedLogs.unshift({ msg, type, time });
+    if (this.persistedLogs.length > 50) {
+      this.persistedLogs = this.persistedLogs.slice(0, 50);
+    }
+    PopupView.log(msg, type, time);
+    void this.persistUiState();
+  }
+
+  private toStatusText(value: boolean | undefined): string | null {
+    if (value === undefined) return null;
+    return value ? 'Enabled' : 'Disabled';
   }
 
   private getErrorMessage(error: unknown): string {
@@ -151,5 +278,29 @@ export class PopupController {
   private isExpectedNavigationError(errorMessage: string): boolean {
     const normalizedError = errorMessage.toLowerCase();
     return PopupController.EXPECTED_NAVIGATION_ERROR_SNIPPETS.some(snippet => normalizedError.includes(snippet));
+  }
+
+  private async updateRouterModel(): Promise<void> {
+    const routerModelElement = DomService.getElement('#routerModel', HTMLElement);
+    const storageKey = this.getTabStorageKey('detectedRouterModel');
+
+    if (storageKey === null) {
+      routerModelElement.textContent = 'Not detected';
+      return;
+    }
+
+    try {
+      const model = await StorageService.get<string>(storageKey);
+      routerModelElement.textContent = typeof model === 'string' && model.trim() !== ''
+        ? model
+        : 'Not detected';
+    } catch {
+      routerModelElement.textContent = 'Not detected';
+    }
+  }
+
+  private getTabStorageKey(baseKey: string): string | null {
+    if (this.activeTabId === null) return null;
+    return `${baseKey}:${this.activeTabId}`;
   }
 }

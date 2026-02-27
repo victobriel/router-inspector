@@ -15,7 +15,8 @@
 	"content_scripts": [
 		{
 			"matches": [
-        "http://*/*"      ],
+        "http://*/*"
+			],
 			"js": [
         "content.js"
       ],
@@ -24,9 +25,10 @@
 	],
 	"web_accessible_resources": [
 		{
-			"resources": ["assets/download.png", "assets/refresh.png", "assets/clear.png"],
+			"resources": ["assets/icon.png"],
 			"matches": [
-        "http://*/*"      ]
+        "http://*/*"
+			]
 		}
 	],
   "background": {
@@ -34,7 +36,13 @@
   },
   "action": {
 		"default_title": "Router Scraping",
-    "default_popup": "popup.html"
+    "default_popup": "popup.html",
+		"default_icon": {
+			"16": "assets/icon.png",
+			"32": "assets/icon.png",
+			"48": "assets/icon.png",
+			"128":"assets/icon.png"
+		}
   },
 	"content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';"

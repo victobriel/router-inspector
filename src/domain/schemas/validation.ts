@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { Router } from "../models/Router.js";
 
 export const CredentialsSchema = z.object({
   username: z.string().min(1, "Username is required"),
@@ -15,6 +14,7 @@ export const WanDataSchema = z.object({
   slaacStatus: z.boolean(),
   dhcpv6Status: z.boolean(),
   pdStatus: z.boolean(),
+  linkSpeed: z.string()
 });
 
 export const CollectMessageSchema = z.object({
@@ -26,7 +26,6 @@ export const CollectMessageSchema = z.object({
 });
 
 export const ExtractionResultSchema = z.object({
-  model: z.string(),
   timestamp: z.string(),
   wan: WanDataSchema.nullable().default(null)
 });

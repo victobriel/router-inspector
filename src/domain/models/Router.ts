@@ -1,7 +1,7 @@
 import type { ButtonConfig, Credentials, ExtractionResult, IResponse } from "../schemas/validation.js";
 
 export abstract class Router {
-  public readonly name: string;
+  private readonly name: string;
 
   protected abstract readonly loginSelectors: {
     username: string;
@@ -83,5 +83,9 @@ export abstract class Router {
 
   public get passwordSelector(): string {
     return this.loginSelectors.password;
+  }
+
+  public get model(): string {
+    return this.name;
   }
 }

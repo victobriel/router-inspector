@@ -1,6 +1,35 @@
 import type { IResponse } from "../../domain/schemas/validation.js";
+import { StorageService } from "../storage/StorageService.js";
 
 class ExtensionManager {
+  public static async saveLastExtractionData(tabId: number | undefined, data: unknown): Promise<IResponse> {
+    if (tabId === undefined || tabId === chrome.tabs.TAB_ID_NONE) {
+      return { success: false, error: 'No tab id available for extraction data.' };
+    }
+
+    if (typeof data !== 'object' || data === null) {
+      return { success: false, error: 'Invalid extraction data.' };
+    }
+
+    await StorageService.save(`lastExtractionData:${tabId}`, data);
+
+    return { success: true };
+  }
+
+  public static async saveDetectedRouterModel(tabId: number | undefined, model: unknown): Promise<IResponse> {
+    if (tabId === undefined || tabId === chrome.tabs.TAB_ID_NONE) {
+      return { success: false, error: 'No tab id available for detected router model.' };
+    }
+
+    if (typeof model !== 'string' || model.trim() === '') {
+      return { success: false, error: 'Invalid router model.' };
+    }
+
+    await StorageService.save(`detectedRouterModel:${tabId}`, model);
+
+    return { success: true };
+  }
+
   private static async resolvePopupWindowId(senderWindowId?: number): Promise<number | null> {
     if (senderWindowId !== undefined && senderWindowId !== chrome.windows.WINDOW_ID_NONE) {
       return senderWindowId;
@@ -33,10 +62,20 @@ class ExtensionManager {
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action !== 'openPopup') {
-    return false; 
+  if (message.action === 'openPopup') {
+    ExtensionManager.openPopup(sender.tab?.windowId).then(sendResponse);
+    return true;
   }
 
-  ExtensionManager.openPopup(sender.tab?.windowId).then(sendResponse);
-  return true;
+  if (message.action === 'saveDetectedRouterModel') {
+    ExtensionManager.saveDetectedRouterModel(sender.tab?.id, message.model).then(sendResponse);
+    return true;
+  }
+
+  if (message.action === 'saveLastExtractionData') {
+    ExtensionManager.saveLastExtractionData(sender.tab?.id, message.data).then(sendResponse);
+    return true;
+  }
+
+  return false;
 });

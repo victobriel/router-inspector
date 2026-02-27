@@ -8,8 +8,9 @@ export class ZteH199ADriver extends Router {
     pass: '#Frm_Password, input[name="Frm_Password"]',
     submit: '#LoginId, button[type="submit"]',
     internetTab: '#internet',
-    configSection: '#internetConfig',
-    ppoeSection: '#template_Internet_0',
+    linkSpeed: '#cLinkSpeed\\:0',
+    wanSection: '#internetConfig',
+    ppoeSection: '#instName_Internet\\:0',
     pppoeUsername: '#UserName\\:0, [id="UserName:0"], [name="UserName:0"], input[name*="UserName"]',
     ipMode: '#IpMode\\:0, [id="IpMode:0"], [name="IpMode:0"], select[name*="IpMode"]'
   };
@@ -50,7 +51,6 @@ export class ZteH199ADriver extends Router {
 
   public async extract(): Promise<ExtractionResult> {
     return {
-      model: this.name,
       timestamp: new Date().toISOString(),
       wan: await this.extractWanData()
     };
@@ -61,9 +61,11 @@ export class ZteH199ADriver extends Router {
     DomService.safeClick(internetTab);
 
     await new Promise(resolve => setTimeout(resolve, 500));
-    await this.waitForElement(this.selectors.configSection);
+    await this.waitForElement(this.selectors.wanSection);
 
-    const configSection = DomService.getElement(this.selectors.configSection, HTMLElement);
+    const linkSpeed = (DomService.getOptionalValue(this.selectors.linkSpeed) ?? '').trim();
+
+    const configSection = DomService.getElement(this.selectors.wanSection, HTMLElement);
     DomService.safeClick(configSection);
 
     await new Promise(resolve => setTimeout(resolve, 500));
@@ -76,11 +78,12 @@ export class ZteH199ADriver extends Router {
       ppoeUsername: (DomService.getOptionalValue(this.selectors.pppoeUsername) ?? '').trim(),
       internetStatus: DomService.getInputElement('#Servlist_INTERNET\\:0').checked,
       tr069Status: DomService.getInputElement('#Servlist_TR069\\:0').checked,
-      ipVersion: DomService.getOptionalValue(this.selectors.ipMode),
+      ipVersion: DomService.getOptionalValue(this.selectors.ipMode)?.toLowerCase() === 'both' ? 'IPv4/IPv6' : DomService.getOptionalValue(this.selectors.ipMode) ?? null,
       requestPdStatus: DomService.getInputElement('#IsPD1\\:0').checked,
       slaacStatus: DomService.getInputElement('#IsSLAAC\\:0').checked,
       dhcpv6Status: DomService.getInputElement('#IsGUA\\:0').checked,
-      pdStatus: DomService.getInputElement('#IsPdAddr\\:0').checked
+      pdStatus: DomService.getInputElement('#IsPdAddr\\:0').checked,
+      linkSpeed
     };
 
     return WanDataSchema.parse(data);

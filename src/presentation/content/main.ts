@@ -1,6 +1,7 @@
 import { RouterFactory } from "../../domain/models/RouterFactory.js";
 import { CollectionService } from "../../application/CollectionService.js";
 import { DomService } from "../../infra/dom/DomService.js";
+import { StorageService } from "../../infra/storage/StorageService.js";
 import { CollectMessageSchema } from "../../domain/schemas/validation.js";
 import type { Router } from "../../domain/models/Router.js";
 
@@ -24,7 +25,18 @@ chrome.runtime.onMessage.addListener((rawMessage, _sender, sendResponse) => {
 });
 
 window.addEventListener('load', async () => {
-  const router = RouterFactory.create();
+  let router: Router;
+  try {
+    router = RouterFactory.create();
+  } catch {
+    return;
+  }
+
+  void chrome.runtime.sendMessage({
+    action: 'saveDetectedRouterModel',
+    model: router.model
+  });
+
   const loginPending = sessionStorage.getItem('router_login_pending');
   const loginTimeStr = sessionStorage.getItem('router_login_time');
 
@@ -43,9 +55,7 @@ async function handlePostLoginRedirect(router: Router, loginTime: number): Promi
   sessionStorage.removeItem('router_login_time');
 
   if (router.isLoginPage()) {
-    await chrome.storage.local.set({ 
-      pendingAuthError: 'Authentication failed. Please check your credentials.' 
-    });
+    await StorageService.save('pendingAuthError', 'Authentication failed. Please check your credentials.');
     chrome.runtime.sendMessage({ action: 'openPopup' });
     return;
   }
@@ -58,6 +68,10 @@ async function handlePostLoginRedirect(router: Router, loginTime: number): Promi
     });
 
     if (result.success) {
+      await chrome.runtime.sendMessage({
+        action: 'saveLastExtractionData',
+        data: result.data
+      });
       chrome.runtime.sendMessage({ action: 'openPopup' });
     }
   }
