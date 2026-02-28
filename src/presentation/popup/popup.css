@@ -18,7 +18,7 @@
   --muted:       #48526b;
   --danger:      #ff4d6d;
   --warn:        #f4b942;
-  --mono:        ui-monospace, 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  --mono:        'Roboto', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
   --sans:        system-ui, -apple-system, 'Segoe UI', sans-serif;
   --radius:      8px;
   --radius-sm:   5px;
@@ -33,23 +33,23 @@ body {
   font-size: 13px;
   line-height: 1.5;
   overflow-x: hidden;
-  height: max-content;
-  max-height: 800px;
+  padding 0 0 18px;
 }
 
 h1 {
-  font-size: 1rem;
+  font-size: 18px;
   font-weight: 700;
+  font-family: var(--sans);
   text-transform: uppercase;
-  font-family: var(--mono);
   color: var(--text);
+  letter-spacing: 0.03em;
 }
 
 header {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 18px 18px 4px;
+  padding: 18px 18px 6px;
   background: linear-gradient(135deg, var(--bg-surface) 0%, #0f1219 100%);
   position: relative;
   overflow: hidden;
@@ -61,11 +61,6 @@ header::after {
   top: 0; left: 0; right: 0;
   height: 2px;
   background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
-}
-
-.logo {
-  width: 20px;
-  height: 20px;
 }
 
 .status-bar {
@@ -103,7 +98,7 @@ header::after {
 
 .status-text {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 0.875rem;
   color: var(--muted);
   transition: color 0.3s;
 }
@@ -119,7 +114,7 @@ header::after {
 
 .model-label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -127,9 +122,39 @@ header::after {
 
 .model-value {
   font-family: var(--mono);
-  font-size: 11px;
+  font-size: 0.75rem;
   color: var(--accent2);
   font-weight: 600;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding-bottom: 4px;
+}
+
+.tab-btn {
+  background: var(--bg-card);
+  border-color: var(--border);
+  border-style: solid;
+  border-width: 0 0 2px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 8px;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  border-color: var(--accent2);
+  color: var(--accent2);
+  background: var(--accent2-dim);
+}
+
+.tab-panel.hidden {
+  display: none;
 }
 
 .credentials-section {
@@ -151,7 +176,7 @@ header::after {
 
 .input-label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -164,7 +189,7 @@ header::after {
   padding: 8px;
   color: var(--text);
   font-family: var(--mono);
-  font-size: 12px;
+  font-size: 0.875rem;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
   width: 100%;
@@ -179,7 +204,7 @@ header::after {
   box-shadow: 0 0 0 2px var(--accent2-dim);
 }
 
-.section {
+section {
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -188,19 +213,43 @@ header::after {
 }
 
 .section-title {
-  font-size: 12px;
+  font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted);
 }
 
-.section-subtitle {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.section-toggle {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
   color: var(--muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.section-toggle-icon {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.collapsible-section.collapsed .section-body {
+  display: none;
+}
+
+.collapsible-section.collapsed .section-toggle-icon {
+  transform: rotate(90deg);
 }
 
 .data-grid {
@@ -235,7 +284,7 @@ header::after {
 
 .card-label {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   color: var(--muted);
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -272,10 +321,9 @@ header::after {
 }
 
 .actions {
-  padding: 6px 18px;
   display: flex;
+  padding: 4px 18px;
   gap: 8px;
-  border-bottom: 1px solid var(--border);
 }
 
 .btn {
@@ -289,7 +337,7 @@ header::after {
   cursor: pointer;
   font-family: var(--sans);
   font-weight: 700;
-  font-size: 12px;
+  font-size: 0.75rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   transition: opacity 0.15s, transform 0.1s, box-shadow 0.2s;
@@ -316,16 +364,6 @@ header::after {
   box-shadow: 0 4px 22px #00d97e55;
 }
 
-.btn-export {
-  background: var(--accent2-dim);
-  border: 1px solid var(--accent2);
-  color: var(--accent2);
-}
-
-.btn-export:hover:not(:disabled) {
-  background: #3d8eff28;
-}
-
 .btn-clear {
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -343,7 +381,7 @@ header::after {
 
 .log-panel {
   padding: 2px 2px 4px;
-  max-height: 180px;
+  height: 280px;
   overflow-y: auto;
   display: flex;
   flex-direction: column;
@@ -353,11 +391,11 @@ header::after {
   border: 1px solid var(--border);
 }
 
-.log-panel::-webkit-scrollbar {
+*::-webkit-scrollbar {
   width: 4px;
 }
 
-.log-panel::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
   background: var(--border);
   border-radius: 2px;
 }
@@ -365,8 +403,7 @@ header::after {
 .log-entry {
   display: flex;
   gap: 8px;
-  font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   line-height: 1.5;
   animation: fadeIn 0.2s ease;
 }

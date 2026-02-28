@@ -32,10 +32,14 @@ window.addEventListener('load', async () => {
     return;
   }
 
-  void chrome.runtime.sendMessage({
+  const result = await chrome.runtime.sendMessage({
     action: 'saveDetectedRouterModel',
     model: router.model
   });
+
+  if (!result?.success) {
+    console.warn('Failed to save detected router model', result?.error);
+  }
 
   const loginPending = sessionStorage.getItem('router_login_pending');
   const loginTimeStr = sessionStorage.getItem('router_login_time');

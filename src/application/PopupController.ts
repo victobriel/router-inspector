@@ -24,7 +24,8 @@ export class PopupController {
 
   private async initialize(): Promise<void> {
     await this.resolveActiveTab();
-    await this.updateRouterModel();
+    const isModelDetected = await this.updateRouterModel();
+    this.setCollectButtonEnabled(isModelDetected);
     await this.loadPersistedData();
     await this.loadPersistedUiState();
     await this.checkPendingErrors();
@@ -280,13 +281,13 @@ export class PopupController {
     return PopupController.EXPECTED_NAVIGATION_ERROR_SNIPPETS.some(snippet => normalizedError.includes(snippet));
   }
 
-  private async updateRouterModel(): Promise<void> {
+  private async updateRouterModel(): Promise<boolean> {
     const routerModelElement = DomService.getElement('#routerModel', HTMLElement);
     const storageKey = this.getTabStorageKey('detectedRouterModel');
 
     if (storageKey === null) {
       routerModelElement.textContent = 'Not detected';
-      return;
+      return false;
     }
 
     try {
@@ -294,9 +295,15 @@ export class PopupController {
       routerModelElement.textContent = typeof model === 'string' && model.trim() !== ''
         ? model
         : 'Not detected';
+      return typeof model === 'string' && model.trim() !== '';
     } catch {
       routerModelElement.textContent = 'Not detected';
+      return false;
     }
+  }
+
+  private setCollectButtonEnabled(enabled: boolean): void {
+    DomService.getElement('#btnCollect', HTMLButtonElement).disabled = !enabled;
   }
 
   private getTabStorageKey(baseKey: string): string | null {

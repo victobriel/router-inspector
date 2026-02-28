@@ -63,18 +63,15 @@ class ExtensionManager {
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'openPopup') {
-    ExtensionManager.openPopup(sender.tab?.windowId).then(sendResponse);
-    return true;
+    return ExtensionManager.openPopup(sender.tab?.windowId).then(sendResponse);
   }
 
   if (message.action === 'saveDetectedRouterModel') {
-    ExtensionManager.saveDetectedRouterModel(sender.tab?.id, message.model).then(sendResponse);
-    return true;
+    return ExtensionManager.saveDetectedRouterModel(sender.tab?.id, message.model).then(sendResponse);
   }
 
   if (message.action === 'saveLastExtractionData') {
-    ExtensionManager.saveLastExtractionData(sender.tab?.id, message.data).then(sendResponse);
-    return true;
+    return ExtensionManager.saveLastExtractionData(sender.tab?.id, message.data).then(sendResponse);
   }
 
   return false;
