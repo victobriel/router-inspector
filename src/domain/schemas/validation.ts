@@ -5,16 +5,17 @@ export const CredentialsSchema = z.object({
   password: z.string().min(1, "Password is required"),
 });
 
-export const WanDataSchema = z.object({
-  ppoeUsername: z.string(),
-  internetStatus: z.boolean(),
-  tr069Status: z.boolean(),
-  ipVersion: z.string().nullable(),
-  requestPdStatus: z.boolean(),
-  slaacStatus: z.boolean(),
-  dhcpv6Status: z.boolean(),
-  pdStatus: z.boolean(),
-  linkSpeed: z.string()
+export const ExtractionResultSchema = z.object({
+  timestamp: z.string().optional(),
+  ppoeUsername: z.string().optional(),
+  internetStatus: z.boolean().optional(),
+  tr069Status: z.boolean().optional(),
+  ipVersion: z.string().nullable().optional(),
+  requestPdStatus: z.boolean().optional(),
+  slaacStatus: z.boolean().optional(),
+  dhcpv6Status: z.boolean().optional(),
+  pdStatus: z.boolean().optional(),
+  linkSpeed: z.string().optional()
 });
 
 export const CollectMessageSchema = z.object({
@@ -25,30 +26,12 @@ export const CollectMessageSchema = z.object({
   })
 });
 
-export const ExtractionResultSchema = z.object({
-  timestamp: z.string(),
-  wan: WanDataSchema.nullable().default(null)
-});
-
 export type Credentials = z.infer<typeof CredentialsSchema>;
-export type WanData = z.infer<typeof WanDataSchema>;
 export type CollectMessage = z.infer<typeof CollectMessageSchema>;
 export type ExtractionResult = z.infer<typeof ExtractionResultSchema>;
-
-export interface IResponse {
-  success: boolean;
-  message?: string;
-  error?: string;
-}
 
 export interface ButtonConfig {
   targetSelector: string;
   text: string;
   style: string;
 }
-
-export type ValueElement =
-  | HTMLInputElement
-  | HTMLSelectElement
-  | HTMLTextAreaElement
-  | (HTMLElement & { value: string });

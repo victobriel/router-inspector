@@ -1,4 +1,4 @@
-import { PopupController } from "../../application/PopupController.js";
+import { PopupController } from "./PopupController.js";
 
 enum tabElement {
 	MAIN = 'main',
@@ -44,19 +44,19 @@ function setupSectionToggles(): void {
 	const toggleWanSection = document.getElementById('toggleWanSection');
 	const wanSection = document.getElementById('wanSection');
 
-	const toggleSecuritySection = document.getElementById('toggleSecuritySection');
-	const securitySection = document.getElementById('securitySection');
+	const toggleRemoteAccessSection = document.getElementById('toggleRemoteAccessSection');
+	const remoteAccessSection = document.getElementById('remoteAccessSection');
 
-	if (!toggleWanSection || !wanSection || !toggleSecuritySection || !securitySection) return;
+	if (!toggleWanSection || !wanSection || !toggleRemoteAccessSection || !remoteAccessSection) return;
 
 	toggleWanSection.addEventListener('click', () => {
 		const isCollapsed = wanSection.classList.toggle('collapsed');
 		toggleWanSection.setAttribute('aria-expanded', String(!isCollapsed));
 	});
 
-	toggleSecuritySection.addEventListener('click', () => {
-		const isCollapsed = securitySection.classList.toggle('collapsed');
-		toggleSecuritySection.setAttribute('aria-expanded', String(!isCollapsed));
+	toggleRemoteAccessSection.addEventListener('click', () => {
+		const isCollapsed = remoteAccessSection.classList.toggle('collapsed');
+		toggleRemoteAccessSection.setAttribute('aria-expanded', String(!isCollapsed));
 	});
 }
 

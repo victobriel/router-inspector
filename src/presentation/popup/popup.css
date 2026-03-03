@@ -24,6 +24,20 @@
   --radius-sm:   5px;
 }
 
+*::-webkit-scrollbar {
+  width: 4px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 2px;
+}
+
+input:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
 body {
   width: 360px;
   min-height: 100px;
@@ -61,6 +75,10 @@ header::after {
   top: 0; left: 0; right: 0;
   height: 2px;
   background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
+}
+
+.hidden {
+  display: none;
 }
 
 .status-bar {
@@ -166,6 +184,10 @@ header::after {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+
+.already-auth-label {
+  color: var(--warn);
 }
 
 .input-group {
@@ -389,15 +411,6 @@ section {
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
   border: 1px solid var(--border);
-}
-
-*::-webkit-scrollbar {
-  width: 4px;
-}
-
-*::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 2px;
 }
 
 .log-entry {

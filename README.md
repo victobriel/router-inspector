@@ -101,7 +101,7 @@ export class MyRouterDriver extends Router {
     password: '#password',
   };
 
-  public async authenticate(credentials: Credentials): Promise<IResponse> { ... }
+  public async authenticate(credentials: Credentials): Promise<CollectResponse> { ... }
   public async extract(): Promise<ExtractionResult> { ... }
   public buttonElementConfig(): ButtonConfig | null { ... }
 }

@@ -1,6 +1,10 @@
 import { ZteH199ADriver } from "../drivers/ZteH199ADriver.js";
-import type { Router } from "./Router.js";
+import type { Router } from "../../domain/models/Router.js";
 
+/**
+ * Infrastructure factory: creates a Router for the current page.
+ * Uses document (browser) for detection; domain has no dependency on infra.
+ */
 export class RouterFactory {
   public static create(): Router {
     const title = document.title.toLowerCase();
@@ -10,18 +14,20 @@ export class RouterFactory {
       return new ZteH199ADriver();
     }
 
-    throw new Error('Unsupported router model: The extension does not recognize this interface.');
+    throw new Error(
+      "Unsupported router model: The extension does not recognize this interface",
+    );
   }
 
   private static isZteH199A(title: string, body: string): boolean {
-    const indicators = ['h199a', 'zxhn', 'h199'];
-    
+    const indicators = ["h199a", "zxhn", "h199"];
+
     for (const term of indicators) {
       if (title.includes(term) || body.includes(term)) {
         return true;
       }
     }
-    
+
     return false;
   }
 }

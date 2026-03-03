@@ -1,7 +1,8 @@
+import { PopupStatusType } from "../../application/types/index.js";
 import { DomService } from "./DomService.js";
 
 export class PopupView {
-  public static setStatus(type: 'ok' | 'warn' | 'err' | '', text: string): void {
+  public static setStatus(type: PopupStatusType, text: string): void {
     const dot = DomService.getElement('#statusDot', HTMLElement);
     const txt = DomService.getElement('#statusText', HTMLElement);
     dot.className = `status-dot ${type}`;
@@ -15,7 +16,7 @@ export class PopupView {
     el.className = `card-value ${displayValue === '-' ? 'empty' : ''}`;
   }
 
-  public static log(msg: string, type: 'ok' | 'warn' | 'err' | '' = '', time?: string): void {
+  public static log(msg: string, type: PopupStatusType = PopupStatusType.NONE, time?: string): void {
     const panel = DomService.getElement('#log', HTMLElement);
     const displayTime = time ?? new Date().toLocaleTimeString('en-US', { hour12: false });
     const entry = document.createElement('div');

@@ -1,4 +1,4 @@
-import type { ButtonConfig, Credentials, ExtractionResult, IResponse } from "../schemas/validation.js";
+import type { ButtonConfig, Credentials, ExtractionResult } from "../schemas/validation.js";
 
 export abstract class Router {
   private readonly name: string;
@@ -10,7 +10,7 @@ export abstract class Router {
 
   protected constructor(name: string) {
     if (new.target === Router) {
-      throw new Error('Router is abstract and cannot be instantiated directly.');
+      throw new Error('Router is abstract and cannot be instantiated directly');
     }
     this.name = name;
   }
@@ -24,11 +24,13 @@ export abstract class Router {
     });
   }
 
-  public abstract authenticate(credentials?: Credentials): Promise<IResponse>;
+  public abstract authenticate(credentials: Credentials): void;
 
   public abstract extract(): Promise<ExtractionResult>;
 
   public abstract buttonElementConfig(): ButtonConfig | null;
+
+  public abstract isAuthenticated(): boolean;
 
   public waitForElement(selector: string, timeoutMs = 5000): Promise<HTMLElement> {
     return new Promise((resolve, reject) => {
@@ -51,29 +53,6 @@ export abstract class Router {
         observer.disconnect();
         reject(new Error(`Timeout: Element "${selector}" not found after ${timeoutMs}ms`));
       }, timeoutMs);
-    });
-  }
-
-  public async waitForAuthRedirect(timeoutMs = 8000): Promise<boolean> {
-    const startTime = Date.now();
-
-    return new Promise((resolve) => {
-      if (!this.isLoginPage()) {
-        resolve(true);
-        return;
-      }
-
-      const interval = setInterval(() => {
-        if (!this.isLoginPage()) {
-          clearInterval(interval);
-          resolve(true);
-        }
-
-        if (Date.now() - startTime >= timeoutMs) {
-          clearInterval(interval);
-          resolve(false);
-        }
-      }, 300);
     });
   }
 

@@ -1,4 +1,4 @@
-import type { ValueElement } from "../../domain/schemas/validation.js";
+import type { ValueElement } from "./types.js";
 
 export class DomService {
   private static isValueElement(element: Element): element is ValueElement {

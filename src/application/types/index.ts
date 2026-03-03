@@ -1,0 +1,17 @@
+import type { ExtractionResult } from "../../domain/schemas/validation.js";
+
+/** Application-level response for collect/authenticate operations. */
+export interface CollectResponse {
+  success: boolean;
+  message?: string;
+  waiting?: boolean;
+  data?: ExtractionResult;
+}
+
+/** Status type for popup UI feedback. */
+export enum PopupStatusType {
+  NONE = "none",
+  OK = "ok",
+  WARN = "warn",
+  ERROR = "error",
+}
