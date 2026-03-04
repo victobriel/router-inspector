@@ -11,9 +11,9 @@ mkdirSync(outdir, { recursive: true });
 // Bundle JS entry points
 await esbuild.build({
   entryPoints: {
-    "background": "src/infra/background/background.ts",
-    "content":    "src/presentation/content/main.ts",
-    "popup":      "src/presentation/popup/popup.ts",
+    background: "src/infra/background/background.ts",
+    content: "src/presentation/content/main.ts",
+    popup: "src/presentation/popup/popup.ts",
   },
   bundle: true,
   outdir,
@@ -25,9 +25,9 @@ await esbuild.build({
 
 // Copy static files
 const staticFiles = [
-  ["manifest.json",                               `${outdir}/manifest.json`],
-  ["src/presentation/popup/popup.html",           `${outdir}/popup.html`],
-  ["src/presentation/popup/popup.css",            `${outdir}/popup.css`],
+  ["manifest.json", `${outdir}/manifest.json`],
+  ["src/presentation/popup/popup.html", `${outdir}/popup.html`],
+  ["src/presentation/popup/popup.css", `${outdir}/popup.css`],
 ];
 
 for (const [src, dest] of staticFiles) {

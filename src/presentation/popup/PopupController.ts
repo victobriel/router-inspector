@@ -7,16 +7,24 @@ import { PopupView } from "../../infra/dom/PopupView.js";
 import { StorageService } from "../../infra/storage/StorageService.js";
 import { PopupStatusType } from "../../application/types/index.js";
 import type { CollectResponse } from "../../application/types/index.js";
+import type { BookmarkStore, CredentialBookmark } from "./index.js";
+import {
+  BOOKMARKS_STORAGE_KEY,
+  LAST_DATA_STORAGE_KEY,
+  MAX_BOOKMARK_CREDENTIALS,
+  PENDING_AUTH_ERROR_STORAGE_KEY,
+  ROUTER_MODEL_STORAGE_KEY,
+  UI_STATE_STORAGE_KEY,
+} from "../../application/constants/index.js";
 
 /** Presentation controller: drives popup UI and Chrome messaging. */
 export class PopupController {
   private currentData: ExtractionResult | null = null;
-  private static readonly LAST_DATA_STORAGE_KEY = "lastExtractionData";
-  private static readonly UI_STATE_STORAGE_KEY = "lastPopupUiState";
   private activeTabId: number | null = null;
+  private routerModel: string | null = null;
   private persistedStatus: { type: PopupStatusType; text: string } = {
     type: PopupStatusType.NONE,
-    text: "Ready",
+    text: "Ready to collect router data",
   };
   private persistedLogs: Array<{
     msg: string;
@@ -39,6 +47,7 @@ export class PopupController {
     await this.resolveActiveTab();
     const isModelDetected = await this.updateRouterModel();
     this.setCollectButtonEnabled(isModelDetected);
+    await this.loadBookmarks();
     await this.loadPersistedData();
     await this.loadPersistedUiState();
     await this.checkPendingErrors();
@@ -55,12 +64,20 @@ export class PopupController {
   private setupListeners(): void {
     DomService.getElement("#btnCollect", HTMLElement).addEventListener(
       "click",
-      () => this.handleCollect(),
+      () => this.handleCollect()
     );
     DomService.getElement("#btnClear", HTMLElement).addEventListener(
       "click",
-      () => this.handleClear(),
+      () => this.handleClear()
     );
+    DomService.getElement("#btnSaveCredentials", HTMLElement).addEventListener(
+      "click",
+      () => void this.handleSaveCredentials()
+    );
+    DomService.getElement(
+      "#btnBookmarkCredentials",
+      HTMLElement
+    ).addEventListener("click", () => void this.handleBookmarkButton());
   }
 
   private async handleCollect(): Promise<void> {
@@ -73,8 +90,14 @@ export class PopupController {
       currentWindow: true,
     });
     if (!tab?.id) {
-      this.setStatus(PopupStatusType.ERROR, "No active tab");
-      this.log("No active tab found", PopupStatusType.ERROR);
+      this.setStatus(
+        PopupStatusType.ERROR,
+        "Cannot find an active browser tab. Open your router page and try again"
+      );
+      this.log(
+        "No active browser tab detected while starting collection",
+        PopupStatusType.ERROR
+      );
       return;
     }
 
@@ -91,7 +114,7 @@ export class PopupController {
         return;
       }
 
-      if (response.success && response.waiting) {
+      if (response.success) {
         await this.startRetryLoop(tab.id);
         return;
       }
@@ -105,13 +128,16 @@ export class PopupController {
       if (isExpectedNavigationError) {
         this.log(
           "Router page is redirecting after login. Retrying collection...",
-          PopupStatusType.WARN,
+          PopupStatusType.WARN
         );
         await this.startRetryLoop(tab.id);
         return;
       }
 
-      this.setStatus(PopupStatusType.ERROR, "Communication failed");
+      this.setStatus(
+        PopupStatusType.ERROR,
+        "Failed to communicate with the router page. Make sure it is open and reachable, then try again"
+      );
       this.log(errorMessage, PopupStatusType.ERROR);
     }
   }
@@ -120,12 +146,13 @@ export class PopupController {
     const maxRetries = 5;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      this.log(`Retrying collection (${attempt}/${maxRetries})...`);
+      this.log(
+        `Retrying collection (${attempt}/${maxRetries}) while waiting for the router page to finish loading...`
+      );
 
       try {
         const res = (await chrome.tabs.sendMessage(tabId, {
           action: "collect",
-          credentials: { username: "", password: "" },
         })) as CollectResponse | undefined;
 
         if (res?.success) {
@@ -144,8 +171,14 @@ export class PopupController {
       }
     }
 
-    this.setStatus(PopupStatusType.ERROR, "Timeout: Page not ready");
-    this.log("Timeout: Page not ready", PopupStatusType.ERROR);
+    this.setStatus(
+      PopupStatusType.ERROR,
+      "Timed out waiting for the router page to be ready. Refresh the page and try again"
+    );
+    this.log(
+      "Timed out waiting for the router page to become ready",
+      PopupStatusType.ERROR
+    );
   }
 
   private processResponse(response: CollectResponse): void {
@@ -155,14 +188,17 @@ export class PopupController {
     });
 
     if (!result.success) {
-      this.setStatus(PopupStatusType.WARN, "Invalid data format received");
+      this.setStatus(
+        PopupStatusType.WARN,
+        "Router returned data in an unexpected format. Refresh the router page and try again"
+      );
       return;
     }
 
     this.currentData = result.data;
     this.renderData();
     void this.persistCurrentData();
-    this.setStatus(PopupStatusType.OK, "Data collected");
+    this.setStatus(PopupStatusType.OK, "Router data collected successfully");
   }
 
   private renderData(): void {
@@ -172,38 +208,36 @@ export class PopupController {
     PopupView.updateField("pppoeUsername", data?.ppoeUsername ?? null);
     PopupView.updateField(
       "internetStatus",
-      this.toStatusText(data?.internetStatus),
+      this.toStatusText(data?.internetStatus)
     );
     PopupView.updateField("tr069Status", this.toStatusText(data?.tr069Status));
     PopupView.updateField("ipVersion", data?.ipVersion ?? null);
     PopupView.updateField(
       "requestPdStatus",
-      this.toStatusText(data?.requestPdStatus),
+      this.toStatusText(data?.requestPdStatus)
     );
-    PopupView.updateField(
-      "slaacStatus",
-      this.toStatusText(data?.slaacStatus),
-    );
+    PopupView.updateField("slaacStatus", this.toStatusText(data?.slaacStatus));
     PopupView.updateField(
       "dhcpv6Status",
-      this.toStatusText(data?.dhcpv6Status),
+      this.toStatusText(data?.dhcpv6Status)
     );
     PopupView.updateField("pdStatus", this.toStatusText(data?.pdStatus));
     PopupView.updateField("linkSpeed", data?.linkSpeed ?? null);
   }
 
   private async checkPendingErrors(): Promise<void> {
-    const pendingAuthError =
-      await StorageService.get<string>("pendingAuthError");
+    const pendingAuthError = await StorageService.get<string>(
+      PENDING_AUTH_ERROR_STORAGE_KEY
+    );
     if (pendingAuthError !== null && pendingAuthError !== "") {
-      await StorageService.remove("pendingAuthError");
+      await StorageService.remove(PENDING_AUTH_ERROR_STORAGE_KEY);
       this.setStatus(PopupStatusType.WARN, pendingAuthError);
     }
   }
 
   private handleClear(): void {
     this.currentData = null;
-    this.setStatus(PopupStatusType.NONE, "Ready");
+    this.setStatus(PopupStatusType.NONE, "Ready to collect router data");
     PopupView.updateField("pppoeUsername", null);
     PopupView.updateField("internetStatus", null);
     PopupView.updateField("tr069Status", null);
@@ -216,18 +250,14 @@ export class PopupController {
     PopupView.clearLogs();
     this.persistedLogs = [];
     void this.persistUiState();
-    const storageKey = this.getTabStorageKey(
-      PopupController.LAST_DATA_STORAGE_KEY,
-    );
+    const storageKey = this.getTabStorageKey(LAST_DATA_STORAGE_KEY);
     if (storageKey !== null) {
       void StorageService.remove(storageKey);
     }
   }
 
   private async loadPersistedData(): Promise<void> {
-    const storageKey = this.getTabStorageKey(
-      PopupController.LAST_DATA_STORAGE_KEY,
-    );
+    const storageKey = this.getTabStorageKey(LAST_DATA_STORAGE_KEY);
     if (storageKey === null) return;
 
     const rawData = await StorageService.get<unknown>(storageKey);
@@ -245,18 +275,14 @@ export class PopupController {
 
   private async persistCurrentData(): Promise<void> {
     if (this.currentData === null) return;
-    const storageKey = this.getTabStorageKey(
-      PopupController.LAST_DATA_STORAGE_KEY,
-    );
+    const storageKey = this.getTabStorageKey(LAST_DATA_STORAGE_KEY);
     if (storageKey === null) return;
 
     await StorageService.save(storageKey, this.currentData, 24 * 60 * 1000);
   }
 
   private async loadPersistedUiState(): Promise<void> {
-    const storageKey = this.getTabStorageKey(
-      PopupController.UI_STATE_STORAGE_KEY,
-    );
+    const storageKey = this.getTabStorageKey(UI_STATE_STORAGE_KEY);
     if (storageKey === null) return;
 
     const state = await StorageService.get<{
@@ -277,7 +303,7 @@ export class PopupController {
         (log) =>
           typeof log?.msg === "string" &&
           log?.type &&
-          typeof log?.time === "string",
+          typeof log?.time === "string"
       ) as Array<{ msg: string; type: PopupStatusType; time: string }>;
 
       this.persistedLogs = logs.slice(0, 50);
@@ -291,15 +317,17 @@ export class PopupController {
   }
 
   private async persistUiState(): Promise<void> {
-    const storageKey = this.getTabStorageKey(
-      PopupController.UI_STATE_STORAGE_KEY,
-    );
+    const storageKey = this.getTabStorageKey(UI_STATE_STORAGE_KEY);
     if (storageKey === null) return;
 
-    await StorageService.save(storageKey, {
-      status: this.persistedStatus,
-      logs: this.persistedLogs,
-    }, 24 * 60 * 1000);
+    await StorageService.save(
+      storageKey,
+      {
+        status: this.persistedStatus,
+        logs: this.persistedLogs,
+      },
+      24 * 60 * 1000
+    );
   }
 
   private setStatus(type: PopupStatusType, text: string): void {
@@ -308,10 +336,7 @@ export class PopupController {
     void this.persistUiState();
   }
 
-  private log(
-    msg: string,
-    type: PopupStatusType = PopupStatusType.NONE,
-  ): void {
+  private log(msg: string, type: PopupStatusType = PopupStatusType.NONE): void {
     const time = new Date().toLocaleTimeString("en-US", { hour12: false });
     this.persistedLogs.unshift({ msg, type, time });
     if (this.persistedLogs.length > 50) {
@@ -360,7 +385,7 @@ export class PopupController {
 
       const messages = parsed
         .map((issue) =>
-          typeof issue?.message === "string" ? issue.message : null,
+          typeof issue?.message === "string" ? issue.message : null
         )
         .filter((item): item is string => item !== null && item.trim() !== "");
 
@@ -373,13 +398,16 @@ export class PopupController {
   private isExpectedNavigationError(errorMessage: string): boolean {
     const normalizedError = errorMessage.toLowerCase();
     return PopupController.EXPECTED_NAVIGATION_ERROR_SNIPPETS.some((snippet) =>
-      normalizedError.includes(snippet),
+      normalizedError.includes(snippet)
     );
   }
 
   private async updateRouterModel(): Promise<boolean> {
-    const routerModelElement = DomService.getElement("#routerModel", HTMLElement);
-    const storageKey = this.getTabStorageKey("detectedRouterModel");
+    const routerModelElement = DomService.getElement(
+      "#routerModel",
+      HTMLElement
+    );
+    const storageKey = this.getTabStorageKey(ROUTER_MODEL_STORAGE_KEY);
 
     if (storageKey === null) {
       routerModelElement.textContent = "Not detected";
@@ -388,24 +416,214 @@ export class PopupController {
 
     try {
       const model = await StorageService.get<string>(storageKey);
+      this.routerModel =
+        typeof model === "string" && model.trim() !== "" ? model : null;
       routerModelElement.textContent =
-        typeof model === "string" && model.trim() !== ""
-          ? model
-          : "Not detected";
-      return typeof model === "string" && model.trim() !== "";
+        this.routerModel !== null ? this.routerModel : "Not detected";
+      return this.routerModel !== null;
     } catch {
       routerModelElement.textContent = "Not detected";
+      this.routerModel = null;
       return false;
     }
   }
 
   private setCollectButtonEnabled(enabled: boolean): void {
-    DomService.getElement("#btnCollect", HTMLButtonElement).disabled =
-      !enabled;
+    DomService.getElement("#btnCollect", HTMLButtonElement).disabled = !enabled;
   }
 
   private getTabStorageKey(baseKey: string): string | null {
     if (this.activeTabId === null) return null;
-    return `${baseKey}:${this.activeTabId}`;
+    return `${baseKey}-${this.activeTabId}`;
+  }
+
+  private async loadBookmarks(): Promise<void> {
+    const container = DomService.getElement(
+      "#bookmarkListContainer",
+      HTMLElement
+    );
+    const list = DomService.getElement("#bookmarkList", HTMLUListElement);
+
+    if (!container || !list || !this.routerModel) {
+      if (container) container.classList.add("hidden");
+      if (list) list.innerHTML = "";
+      return;
+    }
+
+    const store =
+      (await StorageService.get<BookmarkStore>(BOOKMARKS_STORAGE_KEY)) ?? {};
+
+    const modelEntry = store[this.routerModel] ?? {
+      model: this.routerModel,
+      credentials: [],
+    };
+
+    list.innerHTML = "";
+
+    if (!modelEntry.credentials.length) {
+      container.classList.add("hidden");
+      return;
+    }
+
+    const createCredentialItem = (
+      cred: CredentialBookmark,
+      index: number
+    ): HTMLElement => {
+      const li = document.createElement("li");
+      const usernameContainer = document.createElement("div");
+      const passwordContainer = document.createElement("div");
+      const usernameLabelSpan = document.createElement("span");
+      const passwordLabelSpan = document.createElement("span");
+      const usernameValueSpan = document.createElement("span");
+      const passwordValueSpan = document.createElement("span");
+      const deleteButton = document.createElement("button");
+      const deleteIcon = document.createElement("img");
+
+      usernameLabelSpan.textContent = "User:";
+      passwordLabelSpan.textContent = "Password:";
+      usernameValueSpan.textContent = cred.username;
+      passwordValueSpan.textContent = cred.password;
+
+      usernameLabelSpan.className = "bookmark-item-label";
+      passwordLabelSpan.className = "bookmark-item-label";
+      usernameValueSpan.className = "bookmark-item-value";
+      passwordValueSpan.className = "bookmark-item-value";
+      usernameContainer.className = "bookmark-item-container";
+      passwordContainer.className = "bookmark-item-container";
+
+      usernameContainer.append(usernameLabelSpan, usernameValueSpan);
+      passwordContainer.append(passwordLabelSpan, passwordValueSpan);
+
+      deleteButton.type = "button";
+      deleteButton.className = "bookmark-item-trash";
+      deleteButton.title = `Delete saved credentials #${index + 1}`;
+
+      deleteIcon.src = "assets/trash.svg";
+      deleteIcon.alt = "Delete saved credentials";
+      deleteIcon.className = "icon";
+
+      deleteButton.appendChild(deleteIcon);
+
+      li.className = "bookmark-item";
+      li.append(usernameContainer, passwordContainer, deleteButton);
+      li.title = `Use saved credentials #${index + 1}`;
+      li.addEventListener("click", () => {
+        const userInput = DomService.getInputElement("#inputUser");
+        const passInput = DomService.getInputElement("#inputPass");
+        DomService.updateField(userInput, cred.username);
+        DomService.updateField(passInput, cred.password);
+      });
+
+      deleteButton.addEventListener("click", (event) => {
+        event.stopPropagation();
+        void this.deleteCredentialAtIndex(index);
+      });
+
+      return li;
+    };
+
+    modelEntry.credentials.forEach((cred, index) => {
+      const li = createCredentialItem(cred, index);
+      list.appendChild(li);
+    });
+
+    const first = modelEntry.credentials[0];
+    if (first) {
+      const userInput = DomService.getInputElement("#inputUser");
+      const passInput = DomService.getInputElement("#inputPass");
+      DomService.updateField(userInput, first.username);
+      DomService.updateField(passInput, first.password);
+    }
+  }
+
+  private async handleSaveCredentials(): Promise<void> {
+    if (!this.routerModel) {
+      this.setStatus(
+        PopupStatusType.WARN,
+        "Router model not detected. Cannot save credentials"
+      );
+      return;
+    }
+
+    const user = DomService.getValueElement("#inputUser").value.trim();
+    const pass = DomService.getValueElement("#inputPass").value;
+
+    if (!user || !pass) {
+      this.setStatus(
+        PopupStatusType.WARN,
+        "Provide both username and password before saving"
+      );
+      return;
+    }
+
+    const store =
+      (await StorageService.get<BookmarkStore>(BOOKMARKS_STORAGE_KEY)) ?? {};
+
+    const existing = store[this.routerModel] ?? {
+      model: this.routerModel,
+      credentials: [],
+    };
+
+    const updatedCredentials = [...existing.credentials];
+
+    if (updatedCredentials.length >= MAX_BOOKMARK_CREDENTIALS) {
+      this.setStatus(
+        PopupStatusType.WARN,
+        "Maximum number of bookmarks reached. Remove some bookmarks to save new ones"
+      );
+      return;
+    }
+
+    updatedCredentials.push({ username: user, password: pass });
+
+    store[this.routerModel] = {
+      model: this.routerModel,
+      credentials: updatedCredentials.slice(0, MAX_BOOKMARK_CREDENTIALS),
+    };
+
+    await StorageService.save(BOOKMARKS_STORAGE_KEY, store);
+
+    await this.loadBookmarks();
+    this.setStatus(PopupStatusType.OK, "Credentials saved to bookmark list");
+  }
+
+  private async deleteCredentialAtIndex(index: number): Promise<void> {
+    if (!this.routerModel) return;
+
+    const store =
+      (await StorageService.get<BookmarkStore>(BOOKMARKS_STORAGE_KEY)) ?? {};
+    const existing = store[this.routerModel];
+    if (!existing) return;
+
+    const updatedCredentials = [...existing.credentials];
+    if (index < 0 || index >= updatedCredentials.length) return;
+
+    updatedCredentials.splice(index, 1);
+
+    if (updatedCredentials.length === 0) {
+      delete store[this.routerModel];
+    } else {
+      store[this.routerModel] = {
+        model: existing.model,
+        credentials: updatedCredentials,
+      };
+    }
+
+    await StorageService.save(BOOKMARKS_STORAGE_KEY, store);
+    await this.loadBookmarks();
+    this.setStatus(PopupStatusType.OK, "Credential removed from bookmark list");
+  }
+
+  private async handleBookmarkButton(): Promise<void> {
+    const container = DomService.getElement(
+      "#bookmarkListContainer",
+      HTMLElement
+    );
+    if (container.classList.contains("hidden")) {
+      await this.loadBookmarks();
+      container.classList.remove("hidden");
+    } else {
+      container.classList.add("hidden");
+    }
   }
 }

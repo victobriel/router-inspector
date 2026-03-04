@@ -3,30 +3,35 @@ import { DomService } from "./DomService.js";
 
 export class PopupView {
   public static setStatus(type: PopupStatusType, text: string): void {
-    const dot = DomService.getElement('#statusDot', HTMLElement);
-    const txt = DomService.getElement('#statusText', HTMLElement);
+    const dot = DomService.getElement("#statusDot", HTMLElement);
+    const txt = DomService.getElement("#statusText", HTMLElement);
     dot.className = `status-dot ${type}`;
     txt.textContent = text;
   }
 
   public static updateField(id: string, value: string | null): void {
     const el = DomService.getElement(`#val-${id}`, HTMLElement);
-    const displayValue = value === null || value === '' ? '-' : value;
+    const displayValue = value === null || value === "" ? "-" : value;
     el.textContent = displayValue;
-    el.className = `card-value ${displayValue === '-' ? 'empty' : ''}`;
+    el.className = `card-value ${displayValue === "-" ? "empty" : ""}`;
   }
 
-  public static log(msg: string, type: PopupStatusType = PopupStatusType.NONE, time?: string): void {
-    const panel = DomService.getElement('#log', HTMLElement);
-    const displayTime = time ?? new Date().toLocaleTimeString('en-US', { hour12: false });
-    const entry = document.createElement('div');
-    entry.className = 'log-entry';
+  public static log(
+    msg: string,
+    type: PopupStatusType = PopupStatusType.NONE,
+    time?: string
+  ): void {
+    const panel = DomService.getElement("#log", HTMLElement);
+    const displayTime =
+      time ?? new Date().toLocaleTimeString("en-US", { hour12: false });
+    const entry = document.createElement("div");
+    entry.className = "log-entry";
     entry.innerHTML = `<span class="log-time">[${displayTime}]</span><span class="log-msg ${type}">${msg}</span>`;
     panel.prepend(entry);
   }
 
   public static clearLogs(): void {
-    const panel = DomService.getElement('#log', HTMLElement);
-    panel.innerHTML = '';
+    const panel = DomService.getElement("#log", HTMLElement);
+    panel.innerHTML = "";
   }
 }

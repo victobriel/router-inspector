@@ -15,15 +15,19 @@ export const ExtractionResultSchema = z.object({
   slaacStatus: z.boolean().optional(),
   dhcpv6Status: z.boolean().optional(),
   pdStatus: z.boolean().optional(),
-  linkSpeed: z.string().optional()
+  linkSpeed: z.string().optional(),
+  remoteAccessIpv4Status: z.boolean().optional(),
+  remoteAccessIpv6Status: z.boolean().optional(),
 });
 
 export const CollectMessageSchema = z.object({
-  action: z.enum(['authenticate', 'collect'], "Invalid action type"),
-  credentials: z.object({
-    username: z.string(),
-    password: z.string()
-  })
+  action: z.enum(["authenticate", "collect"], "Invalid action type"),
+  credentials: z
+    .object({
+      username: z.string(),
+      password: z.string(),
+    })
+    .optional(),
 });
 
 export type Credentials = z.infer<typeof CredentialsSchema>;

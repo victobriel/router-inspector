@@ -15,7 +15,7 @@ export class RouterFactory {
     }
 
     throw new Error(
-      "Unsupported router model: The extension does not recognize this interface",
+      "Unsupported router model: The extension does not recognize this interface"
     );
   }
 

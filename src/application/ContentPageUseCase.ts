@@ -3,6 +3,15 @@ import { RouterFactory } from "../infra/router/RouterFactory.js";
 import { CollectionService } from "./CollectionService.js";
 import { DomService } from "../infra/dom/DomService.js";
 import { StorageService } from "../infra/storage/StorageService.js";
+import {
+  BOOKMARKS_STORAGE_KEY,
+  PENDING_AUTH_ERROR_STORAGE_KEY,
+} from "./constants/index.js";
+import type { ButtonConfig } from "../domain/schemas/validation.js";
+import type {
+  BookmarkStore,
+  ModelBookmarks,
+} from "../presentation/popup/index.js";
 
 /**
  * Application use case: bootstrap content script on router page.
@@ -23,7 +32,7 @@ export class ContentPageUseCase {
     });
 
     if (!result?.success) {
-      console.warn("Failed to save detected router model", result?.message);
+      console.error("Failed to save detected router model", result?.message);
     }
 
     const loginPending = sessionStorage.getItem("router_login_pending");
@@ -34,29 +43,32 @@ export class ContentPageUseCase {
     }
 
     this.injectUIComponents(router);
+    this.fillLoginFields(router);
   }
 
   private static async handlePostLoginRedirect(
     router: Router,
-    loginTime: number,
+    loginTime: number
   ): Promise<void> {
     sessionStorage.removeItem("router_login_pending");
     sessionStorage.removeItem("router_login_time");
 
-    if (router.isAuthenticated()) {
+    if (!router.isAuthenticated()) {
+      const storageKey = PENDING_AUTH_ERROR_STORAGE_KEY;
       await StorageService.save(
-        "pendingAuthError",
-        "Authentication failed. Please check your credentials", 5 * 60 * 1000,
+        storageKey,
+        "Authentication failed. Please verify your username and password and try again",
+        5 * 60 * 1000
       );
       void chrome.runtime.sendMessage({ action: "openPopup" });
       return;
     }
 
     const elapsed = Date.now() - loginTime;
-    if (elapsed < 10000) {
+    // 10 seconds is the maximum time allowed for authentication
+    if (elapsed < 10 * 1000) {
       const result = await CollectionService.handleCollect({
         action: "collect",
-        credentials: { username: "", password: "" },
       });
 
       if (result.success && result.data) {
@@ -70,50 +82,86 @@ export class ContentPageUseCase {
   }
 
   private static injectUIComponents(router: Router): void {
-    const config = router.buttonElementConfig();
+    const btnElementConfig = router.buttonElementConfig();
 
-    if (config === null || !router.isLoginPage()) return;
+    if (btnElementConfig === null || !router.isLoginPage()) {
+      return;
+    }
+
+    const dataBtnParentElement = DomService.getElement(
+      btnElementConfig.targetSelector,
+      HTMLElement
+    );
+    dataBtnParentElement.style.position = "relative";
 
     try {
-      const targetElement = DomService.getElement(
-        config.targetSelector,
-        HTMLElement,
-      );
-      targetElement.style.position = "relative";
-
-        const btn = document.createElement("button");
-        btn.id = "router-collect-btn";
-        btn.textContent = config.text;
-        btn.style.cssText = config.style;
-
-        btn.addEventListener("click", async () => {
-          const username = DomService.getValueElement(
-            router.usernameSelector,
-          ).value.trim();
-          const password = DomService.getValueElement(
-            router.passwordSelector,
-          ).value;
-
-          if (username === "" || password === "") {
-            alert(
-              "Please enter credentials in the router login fields first.",
-            );
-            return;
-          }
-
-          const result = await CollectionService.handleCollect({
-            action: "authenticate",
-            credentials: { username, password },
-          });
-
-          if (result.success && !result.waiting) {
-            void chrome.runtime.sendMessage({ action: "openPopup" });
-          }
-        });
-
-      targetElement.appendChild(btn);
+      const btn = this.createGetDataBtn(router, btnElementConfig);
+      dataBtnParentElement.appendChild(btn);
     } catch (error) {
       console.warn("UI Injection failed:", error);
+    }
+  }
+
+  private static createGetDataBtn(
+    router: Router,
+    btnElementConfig: ButtonConfig
+  ): HTMLButtonElement {
+    const btn = document.createElement("button");
+    btn.id = "routerCollectDataBtn";
+    btn.textContent = btnElementConfig.text;
+    btn.style.cssText = btnElementConfig.style;
+
+    btn.addEventListener("click", async () => {
+      const username = DomService.getValueElement(
+        router.usernameSelector
+      ).value.trim();
+      const password = DomService.getValueElement(
+        router.passwordSelector
+      ).value;
+
+      if (username === "" || password === "") {
+        alert("Please enter credentials in the router login fields first");
+        return;
+      }
+
+      const result = await CollectionService.handleCollect({
+        action: "authenticate",
+        credentials: { username, password },
+      });
+
+      if (result.success) {
+        void chrome.runtime.sendMessage({ action: "openPopup" });
+      }
+    });
+    return btn;
+  }
+
+  private static async fillLoginFields(router: Router): Promise<void> {
+    if (!router.isLoginPage()) {
+      return;
+    }
+
+    const usernameElement = DomService.getValueElement(router.usernameSelector);
+    const passwordElement = DomService.getValueElement(router.passwordSelector);
+
+    if (!usernameElement || !passwordElement) {
+      console.warn("Failed to find username or password element");
+      return;
+    }
+
+    const store =
+      (await StorageService.get<BookmarkStore>(BOOKMARKS_STORAGE_KEY)) ?? {};
+
+    const modelEntry = store[router.model];
+
+    if (!modelEntry?.credentials || modelEntry.credentials.length === 0) {
+      return;
+    }
+
+    const firstBookmark = modelEntry.credentials[0];
+    if (firstBookmark) {
+      DomService.updateField(usernameElement, firstBookmark.username);
+      DomService.updateField(passwordElement, firstBookmark.password);
     }
   }
 }

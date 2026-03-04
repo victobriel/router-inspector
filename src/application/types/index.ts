@@ -4,7 +4,6 @@ import type { ExtractionResult } from "../../domain/schemas/validation.js";
 export interface CollectResponse {
   success: boolean;
   message?: string;
-  waiting?: boolean;
   data?: ExtractionResult;
 }
 

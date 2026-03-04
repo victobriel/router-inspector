@@ -16,8 +16,8 @@ Router Inspector connects to your router's web interface, authenticates automati
 
 ## Supported Routers
 
-| Model | Status |
-|---|---|
+| Model          | Status       |
+| -------------- | ------------ |
 | ZTE ZXHN H199A | ✅ Supported |
 
 New router models can be added by implementing the `Router` abstract class and registering the driver in `RouterFactory`.

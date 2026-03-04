@@ -1,27 +1,29 @@
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
 :root {
-  --bg-base:     #0c0e12;
-  --bg-surface:  #13161d;
-  --bg-card:     #191d27;
-  --border:      #252a38;
+  --bg-base: #0c0e12;
+  --bg-surface: #13161d;
+  --bg-card: #191d27;
+  --border: #252a38;
   --border-glow: #00d97e40;
-  --accent:      #00d97e;
-  --accent-dim:  #00d97e22;
-  --accent2:     #3d8eff;
+  --accent: #00d97e;
+  --accent-dim: #00d97e22;
+  --accent2: #3d8eff;
   --accent2-dim: #3d8eff18;
-  --text:        #dce3f0;
-  --muted:       #48526b;
-  --danger:      #ff4d6d;
-  --warn:        #f4b942;
-  --mono:        'Roboto', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
-  --sans:        system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --radius:      8px;
-  --radius-sm:   5px;
+  --text: #dce3f0;
+  --muted: #48526b;
+  --danger: #ff4d6d;
+  --warn: #f4b942;
+  --mono: "Roboto", "Cascadia Code", "Fira Code", "Consolas", monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+  --radius: 8px;
+  --radius-sm: 5px;
 }
 
 *::-webkit-scrollbar {
@@ -47,7 +49,6 @@ body {
   font-size: 13px;
   line-height: 1.5;
   overflow-x: hidden;
-  padding 0 0 18px;
 }
 
 h1 {
@@ -70,11 +71,18 @@ header {
 }
 
 header::after {
-  content: '';
+  content: "";
   position: absolute;
-  top: 0; left: 0; right: 0;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 2px;
-  background: linear-gradient(90deg, var(--accent), var(--accent2), transparent);
+  background: linear-gradient(
+    90deg,
+    var(--accent),
+    var(--accent2),
+    transparent
+  );
 }
 
 .hidden {
@@ -96,7 +104,9 @@ header::after {
   border-radius: 50%;
   background: var(--muted);
   flex-shrink: 0;
-  transition: background 0.3s, box-shadow 0.3s;
+  transition:
+    background 0.3s,
+    box-shadow 0.3s;
 }
 
 .status-dot.ok {
@@ -175,15 +185,128 @@ header::after {
   display: none;
 }
 
-.credentials-section {
-  padding: 6px 18px;
-  border-bottom: 1px solid var(--border);
-}
-
 .credentials-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+}
+
+.credentials-buttons {
+  display: flex;
+  align-items: end;
+  gap: 4px;
+}
+
+.bookmark-list {
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+}
+
+.bookmark-title {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+
+.bookmark-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 96px;
+  overflow-y: auto;
+}
+
+.bookmark-item {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr) auto;
+  font-size: 12px;
+  font-family: var(--mono);
+  color: var(--text);
+  padding: 2px 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.bookmark-item:hover {
+  background: var(--accent2-dim);
+  border-color: var(--accent2);
+}
+
+.bookmark-item-label {
+  color: var(--muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.bookmark-item-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: 70px;
+}
+
+.bookmark-item-container {
+  display: flex;
+  gap: 4px;
+}
+
+.bookmark-item-trash {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  justify-self: end;
+  align-self: center;
+  opacity: 0.7;
+}
+
+.bookmark-item-trash:hover {
+  opacity: 1;
+}
+
+.icon {
+  width: 16px;
+  height: 16px;
+}
+
+.btn-save {
+  height: fit-content;
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    135deg,
+    var(--accent2-dim) 0%,
+    rgb(24, 24, 24) 100%
+  );
+  flex: 1;
+}
+
+.btn-save:hover {
+  background: linear-gradient(
+    135deg,
+    var(--accent-dim) 0%,
+    rgb(24, 24, 24) 100%
+  );
+}
+
+.btn-bookmark {
+  height: fit-content;
+  border: 1px solid var(--border);
+  background: linear-gradient(
+    135deg,
+    var(--accent-dim) 0%,
+    rgb(24, 24, 24) 100%
+  );
+  flex: 1;
 }
 
 .already-auth-label {
@@ -193,6 +316,7 @@ header::after {
 .input-group {
   display: flex;
   flex-direction: column;
+  grid-column: span 2;
   gap: 4px;
 }
 
@@ -213,7 +337,9 @@ header::after {
   font-family: var(--mono);
   font-size: 0.875rem;
   outline: none;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
   width: 100%;
 }
 
@@ -334,7 +460,7 @@ section {
   font-style: italic;
 }
 
-.card-value.connected { 
+.card-value.connected {
   color: var(--accent);
 }
 
@@ -362,10 +488,13 @@ section {
   font-size: 0.75rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  transition: opacity 0.15s, transform 0.1s, box-shadow 0.2s;
+  transition:
+    opacity 0.15s,
+    transform 0.1s,
+    box-shadow 0.2s;
 }
 
-.btn:active  {
+.btn:active {
   transform: scale(0.97);
 }
 
@@ -390,11 +519,13 @@ section {
   background: var(--bg-card);
   border: 1px solid var(--border);
   color: var(--muted);
+  opacity: 0.7;
 }
 
 .btn-clear:hover {
-  border-color: var(--danger);
+  background: linear-gradient(135deg, var(--danger) 0%, rgb(102, 0, 0) 100%);
   color: var(--danger);
+  opacity: 1;
 }
 
 .log-section {
@@ -422,8 +553,14 @@ section {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-2px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .log-time {

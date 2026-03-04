@@ -12,10 +12,10 @@ export class ZteH199ADriver extends Router {
     user: '#Frm_Username, input[name="Frm_Username"]',
     pass: '#Frm_Password, input[name="Frm_Password"]',
     submit: '#LoginId, button[type="submit"]',
-    internetTab: '#internet',
-    linkSpeed: '#cLinkSpeed\\:0',
-    wanSection: '#internetConfig',
-    ppoeSection: '#instName_Internet\\:0',
+    internetTab: "#internet",
+    linkSpeed: "#cLinkSpeed\\:0",
+    wanSection: "#internetConfig",
+    ppoeSection: "#instName_Internet\\:0",
     pppoeUsername:
       '#UserName\\:0, [id="UserName:0"], [name="UserName:0"], input[name*="UserName"]',
     ipMode:
@@ -27,10 +27,6 @@ export class ZteH199ADriver extends Router {
   }
 
   public authenticate(credentials: Credentials): void {
-    if (this.isAuthenticated()) {
-      return;
-    }
-
     const { username, password } = credentials;
 
     const userField = DomService.getValueElement(this.selectors.user);
@@ -55,7 +51,7 @@ export class ZteH199ADriver extends Router {
   public async extractWanData(): Promise<ExtractionResult> {
     const internetTab = DomService.getElement(
       this.selectors.internetTab,
-      HTMLElement,
+      HTMLElement
     );
     DomService.safeClick(internetTab);
 
@@ -68,7 +64,7 @@ export class ZteH199ADriver extends Router {
 
     const configSection = DomService.getElement(
       this.selectors.wanSection,
-      HTMLElement,
+      HTMLElement
     );
     DomService.safeClick(configSection);
 
@@ -77,7 +73,7 @@ export class ZteH199ADriver extends Router {
 
     const ppoeSection = DomService.getElement(
       this.selectors.ppoeSection,
-      HTMLElement,
+      HTMLElement
     );
     DomService.safeClick(ppoeSection);
 
@@ -85,15 +81,14 @@ export class ZteH199ADriver extends Router {
       ppoeUsername: (
         DomService.getOptionalValue(this.selectors.pppoeUsername) ?? ""
       ).trim(),
-      internetStatus: DomService.getInputElement(
-        '#Servlist_INTERNET\\:0',
-      ).checked,
-      tr069Status: DomService.getInputElement('#Servlist_TR069\\:0').checked,
+      internetStatus: DomService.getInputElement("#Servlist_INTERNET\\:0")
+        .checked,
+      tr069Status: DomService.getInputElement("#Servlist_TR069\\:0").checked,
       ipVersion:
         DomService.getOptionalValue(this.selectors.ipMode)?.toLowerCase() ===
         "both"
           ? "IPv4/IPv6"
-          : DomService.getOptionalValue(this.selectors.ipMode) ?? null,
+          : (DomService.getOptionalValue(this.selectors.ipMode) ?? null),
       requestPdStatus: DomService.getInputElement("#IsPD1\\:0").checked,
       slaacStatus: DomService.getInputElement("#IsSLAAC\\:0").checked,
       dhcpv6Status: DomService.getInputElement("#IsGUA\\:0").checked,
@@ -111,7 +106,10 @@ export class ZteH199ADriver extends Router {
   };
 
   public isAuthenticated(): boolean {
-    return /(?:^|;\s*)SID=/.test(document.cookie) && !this.isLoginPage();
+    const internetTab = document.querySelector(this.selectors.internetTab);
+    const onLoginPage = this.isLoginPage();
+
+    return !onLoginPage && internetTab instanceof HTMLElement;
   }
 
   public buttonElementConfig(): ButtonConfig | null {

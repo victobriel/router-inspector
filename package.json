@@ -28,9 +28,12 @@
     "compile": "npx tsc",
     "copy-assets": "rsync -av --exclude 'tsconfig.json' --exclude 'src' --exclude 'dist' ./ dist/",
     "copy-static": "find src -type f \\( -name '*.html' -o -name '*.css' -o -name '*.png' -o -name '*.svg' \\) | xargs -I{} rsync -av {} dist/{}",
-    "build": "npm run clean && node build.js"
+    "build": "npm run clean && node build.js",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "prettier": "^3.4.2",
     "@types/chrome": "^0.1.37",
     "esbuild": "^0.27.3",
     "typescript": "^5.9.3"
