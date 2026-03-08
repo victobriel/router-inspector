@@ -240,13 +240,17 @@ export class PopupController {
         HTMLDivElement
       );
 
+      if (topology["24ghz"].clients.length > 0) {
+        panel.innerHTML = "";
+      }
+
       for (const client of topology["24ghz"].clients) {
         const entry = document.createElement("div");
         entry.className = "popup-topology-client-entry";
         entry.innerHTML = `\
         <span class="popup-topology-client-name">${client.name}</span>\
         <span class="popup-topology-client-ip">${client.ip}</span>\
-        <span class="popup-topology-client-mac">${client.mac}</span>\
+        <span class="popup-topology-client-mac">${client.mac.toUpperCase()}</span>\
         <span class="popup-topology-client-signal">${client.signal}</span>\
         `;
         panel.prepend(entry);
@@ -259,13 +263,17 @@ export class PopupController {
         HTMLDivElement
       );
 
+      if (topology["5ghz"].clients.length > 0) {
+        panel.innerHTML = "";
+      }
+
       for (const client of topology["5ghz"].clients) {
         const entry = document.createElement("div");
         entry.className = "popup-topology-client-entry";
         entry.innerHTML = `\
         <span class="popup-topology-client-name">${client.name}</span>\
         <span class="popup-topology-client-ip">${client.ip}</span>\
-        <span class="popup-topology-client-mac">${client.mac}</span>\
+        <span class="popup-topology-client-mac">${client.mac.toUpperCase()}</span>\
         <span class="popup-topology-client-signal">${client.signal}</span>\
         `;
         panel.prepend(entry);
@@ -278,13 +286,17 @@ export class PopupController {
         HTMLDivElement
       );
 
+      if (topology["cable"].clients.length > 0) {
+        panel.innerHTML = "";
+      }
+
       for (const client of topology["cable"].clients) {
         const entry = document.createElement("div");
         entry.className = "popup-topology-client-entry";
         entry.innerHTML = `\
         <span class="popup-topology-client-name">${client.name}</span>\
         <span class="popup-topology-client-ip">${client.ip}</span>\
-        <span class="popup-topology-client-mac">${client.mac}</span>\
+        <span class="popup-topology-client-mac">${client.mac.toUpperCase()}</span>\
         <span class="popup-topology-client-signal">${client.signal}</span>\
         `;
         panel.prepend(entry);
@@ -320,17 +332,20 @@ export class PopupController {
       "#popup-section-topology-24ghz-body",
       HTMLDivElement
     );
-    topologyPanel24ghz.innerHTML = "";
+    topologyPanel24ghz.innerHTML =
+      "<span class='popup-topology-no-data'>No data</span>";
     const topologyPanel5ghz = DomService.getElement(
       "#popup-section-topology-5ghz-body",
       HTMLDivElement
     );
-    topologyPanel5ghz.innerHTML = "";
+    topologyPanel5ghz.innerHTML =
+      "<span class='popup-topology-no-data'>No data</span>";
     const topologyPanelCable = DomService.getElement(
       "#popup-section-topology-cable-body",
       HTMLDivElement
     );
-    topologyPanelCable.innerHTML = "";
+    topologyPanelCable.innerHTML =
+      "<span class='popup-topology-no-data'>No data</span>";
     PopupView.clearLogs();
     this.persistedLogs = [];
     void this.persistUiState();
