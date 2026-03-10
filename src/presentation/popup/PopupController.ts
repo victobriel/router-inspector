@@ -247,12 +247,19 @@ export class PopupController {
       for (const client of topology["24ghz"].clients) {
         const entry = document.createElement("div");
         entry.className = "popup-topology-client-entry";
-        entry.innerHTML = `\
-        <span class="popup-topology-client-name">${client.name}</span>\
-        <span class="popup-topology-client-ip">${client.ip}</span>\
-        <span class="popup-topology-client-mac">${client.mac.toUpperCase()}</span>\
-        <span class="popup-topology-client-signal">${client.signal}</span>\
-        `;
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "popup-topology-client-name";
+        nameSpan.textContent = client.name;
+        const ipSpan = document.createElement("span");
+        ipSpan.className = "popup-topology-client-ip";
+        ipSpan.textContent = client.ip;
+        const macSpan = document.createElement("span");
+        macSpan.className = "popup-topology-client-mac";
+        macSpan.textContent = client.mac.toUpperCase();
+        const signalSpan = document.createElement("span");
+        signalSpan.className = "popup-topology-client-signal";
+        signalSpan.textContent = String(client.signal);
+        entry.append(nameSpan, ipSpan, macSpan, signalSpan);
         panel.prepend(entry);
       }
     }
@@ -270,12 +277,19 @@ export class PopupController {
       for (const client of topology["5ghz"].clients) {
         const entry = document.createElement("div");
         entry.className = "popup-topology-client-entry";
-        entry.innerHTML = `\
-        <span class="popup-topology-client-name">${client.name}</span>\
-        <span class="popup-topology-client-ip">${client.ip}</span>\
-        <span class="popup-topology-client-mac">${client.mac.toUpperCase()}</span>\
-        <span class="popup-topology-client-signal">${client.signal}</span>\
-        `;
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "popup-topology-client-name";
+        nameSpan.textContent = client.name;
+        const ipSpan = document.createElement("span");
+        ipSpan.className = "popup-topology-client-ip";
+        ipSpan.textContent = client.ip;
+        const macSpan = document.createElement("span");
+        macSpan.className = "popup-topology-client-mac";
+        macSpan.textContent = client.mac.toUpperCase();
+        const signalSpan = document.createElement("span");
+        signalSpan.className = "popup-topology-client-signal";
+        signalSpan.textContent = String(client.signal);
+        entry.append(nameSpan, ipSpan, macSpan, signalSpan);
         panel.prepend(entry);
       }
     }
@@ -293,12 +307,19 @@ export class PopupController {
       for (const client of topology["cable"].clients) {
         const entry = document.createElement("div");
         entry.className = "popup-topology-client-entry";
-        entry.innerHTML = `\
-        <span class="popup-topology-client-name">${client.name}</span>\
-        <span class="popup-topology-client-ip">${client.ip}</span>\
-        <span class="popup-topology-client-mac">${client.mac.toUpperCase()}</span>\
-        <span class="popup-topology-client-signal">${client.signal}</span>\
-        `;
+        const nameSpan = document.createElement("span");
+        nameSpan.className = "popup-topology-client-name";
+        nameSpan.textContent = client.name;
+        const ipSpan = document.createElement("span");
+        ipSpan.className = "popup-topology-client-ip";
+        ipSpan.textContent = client.ip;
+        const macSpan = document.createElement("span");
+        macSpan.className = "popup-topology-client-mac";
+        macSpan.textContent = client.mac.toUpperCase();
+        const signalSpan = document.createElement("span");
+        signalSpan.className = "popup-topology-client-signal";
+        signalSpan.textContent = String(client.signal);
+        entry.append(nameSpan, ipSpan, macSpan, signalSpan);
         panel.prepend(entry);
       }
     }

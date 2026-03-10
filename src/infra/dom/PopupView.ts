@@ -26,7 +26,13 @@ export class PopupView {
       time ?? new Date().toLocaleTimeString("en-US", { hour12: false });
     const entry = document.createElement("div");
     entry.className = "popup-log-entry";
-    entry.innerHTML = `<span class="popup-log-time">[${displayTime}]</span><span class="popup-log-msg ${type}">${msg}</span>`;
+    const timeSpan = document.createElement("span");
+    timeSpan.className = "popup-log-time";
+    timeSpan.textContent = `[${displayTime}]`;
+    const msgSpan = document.createElement("span");
+    msgSpan.className = `popup-log-msg ${type}`;
+    msgSpan.textContent = msg;
+    entry.append(timeSpan, msgSpan);
     panel.prepend(entry);
   }
 
