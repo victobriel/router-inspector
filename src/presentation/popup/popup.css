@@ -9,10 +9,13 @@
   --popup-accent2: #3d8eff;
   --popup-accent2-dim: #3d8eff18;
   --popup-text: #dce3f0;
-  --popup-muted: #48526b;
+  --popup-muted: #6b7a9b;
   --popup-danger: #ff4d6d;
   --popup-warn: #f4b942;
-  --popup-mono: "Roboto", "Cascadia Code", "Fira Code", "Consolas", monospace;
+  --popup-danger-end: #5e0000;
+  --popup-bg-gradient-end: #0f1219;
+  --popup-border-hover: #2e3548;
+  --popup-mono: "Cascadia Code", "Fira Code", "Consolas", monospace;
   --popup-sans: system-ui, -apple-system, "Segoe UI", sans-serif;
   --popup-radius: 8px;
   --popup-radius-sm: 5px;
@@ -42,9 +45,12 @@
   --popup-accent2: #0f766e;
   --popup-accent2-dim: #0f766e18;
   --popup-text: #0b1120;
-  --popup-muted: #6b7280;
+  --popup-muted: #4b5568;
   --popup-danger: #b91c1c;
   --popup-warn: #b45309;
+  --popup-danger-end: #7f1d1d;
+  --popup-bg-gradient-end: #dde2ef;
+  --popup-border-hover: #b3bed8;
 }
 
 /* Explicit dark theme (matches default) */
@@ -59,9 +65,12 @@
   --popup-accent2: #3d8eff;
   --popup-accent2-dim: #3d8eff18;
   --popup-text: #dce3f0;
-  --popup-muted: #48526b;
+  --popup-muted: #6b7a9b;
   --popup-danger: #ff4d6d;
   --popup-warn: #f4b942;
+  --popup-danger-end: #5e0000;
+  --popup-bg-gradient-end: #0f1219;
+  --popup-border-hover: #2e3548;
 }
 
 *,
@@ -112,7 +121,7 @@ h1 {
   align-items: center;
   gap: 0.5rem;
   padding: 18px 18px 6px;
-  background: linear-gradient(135deg, var(--popup-bg-surface) 0%, #0f1219 100%);
+  background: linear-gradient(135deg, var(--popup-bg-surface) 0%, var(--popup-bg-gradient-end) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -146,7 +155,7 @@ h1 {
   align-items: center;
   gap: 8px;
   padding: 6px 18px;
-  background: linear-gradient(135deg, var(--popup-bg-surface) 0%, #0f1219 100%);
+  background: linear-gradient(135deg, var(--popup-bg-surface) 0%, var(--popup-bg-gradient-end) 100%);
   border-bottom: 1px solid var(--popup-border);
 }
 
@@ -444,7 +453,7 @@ h1 {
   background: linear-gradient(
     135deg,
     var(--popup-accent2-dim) 0%,
-    rgb(24, 24, 24) 100%
+    var(--popup-bg-base) 100%
   );
   flex: 1;
 }
@@ -453,7 +462,7 @@ h1 {
   background: linear-gradient(
     135deg,
     var(--popup-accent-dim) 0%,
-    rgb(24, 24, 24) 100%
+    var(--popup-bg-base) 100%
   );
 }
 
@@ -463,7 +472,7 @@ h1 {
   background: linear-gradient(
     135deg,
     var(--popup-accent-dim) 0%,
-    rgb(24, 24, 24) 100%
+    var(--popup-bg-base) 100%
   );
   flex: 1;
 }
@@ -525,8 +534,8 @@ h1 {
 }
 
 .popup-collapsible-trigger {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border: 1px solid var(--popup-border);
   border-radius: var(--popup-radius-sm);
   background: var(--popup-bg-card);
@@ -563,12 +572,12 @@ h1 {
   background: var(--popup-bg-card);
   border: 1px solid var(--popup-border);
   border-radius: var(--popup-radius);
-  padding: 0px 6px;
+  padding: var(--space-1) 6px;
   transition: border-color 0.2s;
 }
 
 .popup-data-card:hover {
-  border-color: #2e3548;
+  border-color: var(--popup-border-hover);
 }
 
 .popup-data-card--1-4 {
@@ -684,7 +693,7 @@ h1 {
   background: linear-gradient(
     135deg,
     var(--popup-danger) 0%,
-    rgb(102, 0, 0) 100%
+    var(--popup-danger-end) 100%
   );
   color: var(--popup-danger);
   opacity: 1;
@@ -741,4 +750,36 @@ h1 {
 
 .popup-log-msg.warn {
   color: var(--popup-warn);
+}
+
+/* Loading shimmer state */
+@keyframes popup-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.popup-card-value--loading {
+  background: linear-gradient(
+    90deg,
+    var(--popup-border) 25%,
+    var(--popup-border-hover) 50%,
+    var(--popup-border) 75%
+  );
+  background-size: 200% 100%;
+  animation: popup-shimmer 1.5s ease-in-out infinite;
+  border-radius: 2px;
+  color: transparent !important;
+  user-select: none;
+  min-width: 40px;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

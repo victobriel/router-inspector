@@ -3,12 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
-      rel="stylesheet"
-    />
     <link href="./popup.css" rel="stylesheet" />
   </head>
   <body>
@@ -91,12 +85,14 @@
           <button
             class="popup-btn popup-btn-save"
             id="popup-btn-save-credentials"
+            aria-label="Save credentials"
           >
             <img src="assets/save.svg" class="popup-icon" alt="Save" />
           </button>
           <button
             class="popup-btn popup-btn-bookmark"
             id="popup-btn-toggle-bookmarks"
+            aria-label="Toggle saved credentials"
           >
             <img src="assets/bookmark.svg" class="popup-icon" alt="Bookmark" />
           </button>
@@ -123,7 +119,11 @@
           <img src="assets/play.svg" class="popup-icon" alt="Play" />
           Start
         </button>
-        <button class="popup-btn popup-btn-clear" id="popup-btn-clear">
+        <button
+          class="popup-btn popup-btn-clear"
+          id="popup-btn-clear"
+          aria-label="Clear data"
+        >
           <img src="assets/trash.svg" class="popup-icon" alt="Trash" />
         </button>
       </div>
