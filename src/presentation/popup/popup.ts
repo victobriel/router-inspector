@@ -49,86 +49,54 @@ function setupTabs(): void {
   tabTopology.addEventListener("click", () => activate(tabElement.TOPOLOGY));
 }
 
+/** Section toggle/section id pairs; must match popup.html. */
+const SECTION_IDS = [
+  { toggleId: "popup-toggle-wan", sectionId: "popup-section-wan" },
+  {
+    toggleId: "popup-toggle-remote-access",
+    sectionId: "popup-section-remote-access",
+  },
+  {
+    toggleId: "popup-toggle-wlan-band-steering",
+    sectionId: "popup-section-wlan-band-steering",
+  },
+  {
+    toggleId: "popup-toggle-wlan-24ghz",
+    sectionId: "popup-section-wlan-24ghz",
+  },
+  { toggleId: "popup-toggle-wlan-5ghz", sectionId: "popup-section-wlan-5ghz" },
+  { toggleId: "popup-toggle-dhcp", sectionId: "popup-section-dhcp" },
+  { toggleId: "popup-toggle-upnp", sectionId: "popup-section-upnp" },
+  {
+    toggleId: "popup-toggle-router-version",
+    sectionId: "popup-section-router-version",
+  },
+  { toggleId: "popup-toggle-tr069-url", sectionId: "popup-section-tr069-url" },
+  {
+    toggleId: "popup-toggle-topology-cable",
+    sectionId: "popup-section-topology-cable",
+  },
+  {
+    toggleId: "popup-toggle-topology-24ghz",
+    sectionId: "popup-section-topology-24ghz",
+  },
+  {
+    toggleId: "popup-toggle-topology-5ghz",
+    sectionId: "popup-section-topology-5ghz",
+  },
+] as const;
+
 function setupSectionToggles(): void {
-  const toggleWanSection = document.getElementById("popup-toggle-wan");
-  const wanSection = document.getElementById("popup-section-wan");
+  for (const { toggleId, sectionId } of SECTION_IDS) {
+    const toggle = document.getElementById(toggleId);
+    const section = document.getElementById(sectionId);
+    if (!toggle || !section) continue;
 
-  const toggleRemoteAccessSection = document.getElementById(
-    "popup-toggle-remote-access"
-  );
-  const remoteAccessSection = document.getElementById(
-    "popup-section-remote-access"
-  );
-
-  const toggleTopology24ghzSection = document.getElementById(
-    "popup-toggle-topology-24ghz"
-  );
-  const topology24ghzSection = document.getElementById(
-    "popup-section-topology-24ghz"
-  );
-  const toggleTopology5ghzSection = document.getElementById(
-    "popup-toggle-topology-5ghz"
-  );
-  const topology5ghzSection = document.getElementById(
-    "popup-section-topology-5ghz"
-  );
-  const toggleTopologyCableSection = document.getElementById(
-    "popup-toggle-topology-cable"
-  );
-  const topologyCableSection = document.getElementById(
-    "popup-section-topology-cable"
-  );
-
-  if (
-    !toggleWanSection ||
-    !wanSection ||
-    !toggleRemoteAccessSection ||
-    !remoteAccessSection ||
-    !toggleTopology24ghzSection ||
-    !topology24ghzSection ||
-    !toggleTopology5ghzSection ||
-    !topology5ghzSection ||
-    !toggleTopologyCableSection ||
-    !topologyCableSection
-  )
-    return;
-
-  toggleWanSection.addEventListener("click", () => {
-    const isCollapsed = wanSection.classList.toggle("collapsed");
-    toggleWanSection.setAttribute("aria-expanded", String(!isCollapsed));
-  });
-
-  toggleRemoteAccessSection.addEventListener("click", () => {
-    const isCollapsed = remoteAccessSection.classList.toggle("collapsed");
-    toggleRemoteAccessSection.setAttribute(
-      "aria-expanded",
-      String(!isCollapsed)
-    );
-  });
-
-  toggleTopology24ghzSection.addEventListener("click", () => {
-    const isCollapsed = topology24ghzSection.classList.toggle("collapsed");
-    toggleTopology24ghzSection.setAttribute(
-      "aria-expanded",
-      String(!isCollapsed)
-    );
-  });
-
-  toggleTopology5ghzSection.addEventListener("click", () => {
-    const isCollapsed = topology5ghzSection.classList.toggle("collapsed");
-    toggleTopology5ghzSection.setAttribute(
-      "aria-expanded",
-      String(!isCollapsed)
-    );
-  });
-
-  toggleTopologyCableSection.addEventListener("click", () => {
-    const isCollapsed = topologyCableSection.classList.toggle("collapsed");
-    toggleTopologyCableSection.setAttribute(
-      "aria-expanded",
-      String(!isCollapsed)
-    );
-  });
+    toggle.addEventListener("click", () => {
+      const isCollapsed = section.classList.toggle("collapsed");
+      toggle.setAttribute("aria-expanded", String(!isCollapsed));
+    });
+  }
 }
 
 function setupSettingsButton(): void {

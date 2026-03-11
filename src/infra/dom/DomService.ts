@@ -50,7 +50,9 @@ export class DomService {
 
     const option =
       element.selectedOptions[0] ??
-      (element.selectedIndex >= 0 ? element.options[element.selectedIndex] : null);
+      (element.selectedIndex >= 0
+        ? element.options[element.selectedIndex]
+        : null);
 
     if (!option) return null;
     return (option.textContent ?? "").trim();
