@@ -21,7 +21,6 @@ import type { ITopologySectionParser } from "../shared/TopologySectionParser.js"
 export class ZteH199ADriver extends BaseRouter {
   private readonly s = Selectors;
   private readonly topologyParser: ITopologySectionParser;
-
   protected readonly loginSelectors = ZteH199ALoginSelectors;
 
   constructor(topologyParser: ITopologySectionParser) {
@@ -52,6 +51,10 @@ export class ZteH199ADriver extends BaseRouter {
       ...(await this.extractBandSteeringData()),
       ...(await this.extractWlanData()),
       ...(await this.extractLanData()),
+      ...(await this.extractUpnpData()),
+      ...(await this.extractRouterVersionData()),
+      ...(await this.extractTr069UrlData()),
+      goToHomePage: this.goToHomePage(),
     };
 
     return ExtractionResultSchema.parse(data);
@@ -474,6 +477,64 @@ export class ZteH199ADriver extends BaseRouter {
       dhcpLeaseTimeMode: dhcpLeaseTimeMode ?? "",
       dhcpLeaseTime: dhcpLeaseTime ?? "",
     };
+  }
+
+  private async extractUpnpData(): Promise<
+    Pick<ExtractionResult, "upnpEnabled">
+  > {
+    await this.clickElementAndWait(
+      this.s.localNetworkTab,
+      this.s.upnpContainer
+    );
+    await this.clickElementAndWait(this.s.upnpContainer, this.s.upnpEnabled);
+
+    const upnpEnabled = DomService.getInputElement(this.s.upnpEnabled).checked;
+
+    return {
+      upnpEnabled,
+    };
+  }
+
+  private async extractRouterVersionData(): Promise<
+    Pick<ExtractionResult, "routerVersion">
+  > {
+    await this.clickElementAndWait(
+      this.s.managementTab,
+      this.s.routerVersionContainer
+    );
+    await this.clickElementAndWait(
+      this.s.routerVersionContainer,
+      this.s.routerVersion
+    );
+
+    const routerVersion = (
+      DomService.getOptionalValue(this.s.routerVersion) ?? ""
+    ).trim();
+
+    return { routerVersion };
+  }
+
+  private async extractTr069UrlData(): Promise<
+    Pick<ExtractionResult, "tr069Url">
+  > {
+    await this.clickElementAndWait(
+      this.s.managementTab,
+      this.s.tr069UrlContainer
+    );
+    await this.clickElementAndWait(this.s.tr069UrlContainer, this.s.tr069Url);
+
+    const tr069Url = (
+      DomService.getOptionalValue(this.s.tr069Url) ?? ""
+    ).trim();
+
+    return { tr069Url };
+  }
+
+  private goToHomePage(): boolean {
+    const homePage = document.querySelector<HTMLElement>(this.s.homeTab);
+    if (!homePage) return false;
+    DomService.safeClick(homePage);
+    return true;
   }
 
   private readDhcpOctetFields(

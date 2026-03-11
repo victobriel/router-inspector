@@ -150,6 +150,18 @@ export const ZteH199ASelectors = {
   dhcpSecondaryDnsField4: "input[id^='sub_DNSServer23']",
   dhcpLeaseTimeMode: "#LeaseTimeMode",
   dhcpLeaseTime: "#LeaseTimeSelfDefine",
+
+  // Local Network -> UPnP
+  upnpContainer: "#upnp",
+  upnpEnabled: "input[id^='OBJ_UPNPCONFIG_ID.EnableUPnPIGD1:LocalUPnP']",
+
+  // Management -> Router Version
+  routerVersionContainer: "#statusMgr",
+  routerVersion: "#SoftwareVer",
+
+  // Management -> TR069 URL
+  tr069UrlContainer: "#remoteMgr",
+  tr069Url: "#URL",
 } as const;
 
 /** Login form selectors for Router base class (password may include fallbacks). */

@@ -328,6 +328,9 @@ export class PopupController {
     PopupView.updateField("dhcpSecondaryDns", data?.dhcpSecondaryDns ?? null);
     PopupView.updateField("dhcpLeaseTimeMode", data?.dhcpLeaseTimeMode ?? null);
     PopupView.updateField("dhcpLeaseTime", data?.dhcpLeaseTime ?? null);
+    PopupView.updateField("upnpEnabled", this.toStatusText(data?.upnpEnabled));
+    PopupView.updateField("routerVersion", data?.routerVersion ?? null);
+    PopupView.updateField("tr069Url", data?.tr069Url ?? null);
     const topology = data?.topology;
     if (topology) {
       for (const band of ["24ghz", "5ghz", "cable"] as const) {
@@ -436,6 +439,9 @@ export class PopupController {
     PopupView.updateField("dhcpSecondaryDns", null);
     PopupView.updateField("dhcpLeaseTimeMode", null);
     PopupView.updateField("dhcpLeaseTime", null);
+    PopupView.updateField("upnpEnabled", null);
+    PopupView.updateField("routerVersion", null);
+    PopupView.updateField("tr069Url", null);
     for (const band of ["24ghz", "5ghz", "cable"] as const) {
       this.clearTopologyBand(band);
     }
