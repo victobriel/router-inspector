@@ -162,6 +162,14 @@ export const ZteH199ASelectors = {
   // Management -> TR069 URL
   tr069UrlContainer: "#remoteMgr",
   tr069Url: "#URL",
+
+  // Management -> Ping
+  diagnosticsContainer: "#networkDiag",
+  diagnosticsPingContainer: "#instName_PingDiagnosis",
+  diagnosticsPingIpAddress: "#Host\\:PingDiagnosis",
+  pingSendButton: "#Btn_PingDiagnosis",
+  pingResult: "#PingAck",
+  pingWaiting: "#confirmLayer",
 } as const;
 
 /** Login form selectors for Router base class (password may include fallbacks). */

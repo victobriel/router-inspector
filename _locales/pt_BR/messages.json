@@ -42,8 +42,53 @@
   "popup_collect_start": { "message": "Iniciar" },
   "popup_clear_aria_label": { "message": "Limpar dados" },
 
-  "popup_tab_main": { "message": "Principal" },
+  "popup_tab_main": { "message": "Dados" },
   "popup_tab_topology": { "message": "Topologia" },
+  "popup_tab_diagnostics": { "message": "Diagnóstico" },
+  "popup_diagnostics_ping_label": {
+    "message": "Ping"
+  },
+  "popup_diagnostics_device_placeholder": {
+    "message": "Selecione um dispositivo"
+  },
+  "popup_diagnostics_ping_button": {
+    "message": "Ping"
+  },
+  "popup_diagnostics_ping_button_aria": {
+    "message": "Iniciar teste de ping para o dispositivo selecionado"
+  },
+  "popup_diagnostics_result_label": {
+    "message": "Resultado"
+  },
+  "popup_diagnostics_no_device_selected": {
+    "message": "Selecione um dispositivo para iniciar o teste de ping"
+  },
+  "popup_diagnostics_ping_started": {
+    "message": "Teste de ping iniciado para $ip$",
+    "placeholders": {
+      "ip": {
+        "content": "$1"
+      }
+    }
+  },
+  "popup_diagnostics_ping_success": {
+    "message": "Teste de ping concluído com sucesso"
+  },
+  "popup_diagnostics_mode_internal": {
+    "message": "Interno",
+    "description": "Label for diagnostics mode internal."
+  },
+  "popup_diagnostics_mode_external": {
+    "message": "Externo",
+    "description": "Label for diagnostics mode external."
+  },
+  "popup_diagnostics_copy_result_button": {
+    "message": "Copiar resultado"
+  },
+  "popup_diagnostics_copy_result_button_aria": {
+    "message": "Copiar resultado do diagnóstico"
+  },
+  "popup_tab_reports": { "message": "Relatório" },
   "popup_tab_logs": { "message": "Logs" },
 
   "popup_section_wan": { "message": "WAN" },
@@ -267,5 +312,46 @@
   },
   "popup_status_bookmark_removed": {
     "message": "Credencial removida da lista de favoritos"
+  },
+
+  "popup_copy_text": {
+    "message": "Copiar texto"
+  },
+  "popup_copy_text_aria": {
+    "message": "Copiar texto com informações do roteador"
+  },
+  "popup_copy_text_copied": {
+    "message": "Copiado!"
+  },
+  "popup_copy_text_copied_aria": {
+    "message": "Texto com informações do roteador copiado"
+  },
+  "popup_status_copy_success": {
+    "message": "Informações do roteador copiadas para a área de transferência"
+  },
+  "popup_error_no_data_to_copy": {
+    "message": "Colete os dados do roteador antes de copiar"
+  },
+
+  "settings_section_copy_template": {
+    "message": "Modelo de texto para cópia"
+  },
+  "settings_copy_template_label": {
+    "message": "Formato do texto copiado"
+  },
+  "settings_copy_template_desc": {
+    "message": "Defina o formato de texto usado ao clicar no botão “Copiar texto” no popup. Os placeholders serão substituídos pelos valores mais recentes coletados."
+  },
+  "settings_copy_template_hint": {
+    "message": "Placeholders disponíveis (clique para expandir)"
+  },
+  "settings_copy_template_save": {
+    "message": "Salvar"
+  },
+  "settings_copy_template_toast_saved": {
+    "message": "Salvo"
+  },
+  "settings_copy_template_error_empty": {
+    "message": "Defina um formato antes de salvar"
   }
 }

@@ -188,6 +188,11 @@ body {
   border-top: 1px solid var(--ri-border);
 }
 
+.settings-row--stacked {
+  flex-direction: column;
+  align-items: stretch;
+}
+
 .settings-row-info {
   display: flex;
   flex-direction: column;
@@ -207,6 +212,55 @@ body {
   color: var(--ri-muted);
   line-height: 1.5;
   max-width: 420px;
+}
+
+.settings-textarea {
+  width: 100%;
+  min-height: 96px;
+  resize: vertical;
+  padding: var(--ri-space-3);
+  border-radius: var(--ri-radius-sm);
+  border: 1px solid var(--ri-border);
+  background-color: var(--ri-bg-card);
+  color: var(--ri-text);
+  font-family: var(--ri-mono);
+  font-size: var(--ri-text-xs);
+  line-height: 1.5;
+  resize: none;
+}
+
+.settings-textarea:focus-visible {
+  outline: 2px solid var(--ri-accent2);
+  outline-offset: 2px;
+}
+
+.settings-placeholder-accordion {
+  margin-top: var(--ri-space-2);
+}
+
+.settings-placeholder-accordion > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.settings-row-hint {
+  font-size: var(--ri-text-sm);
+  color: var(--ri-muted);
+}
+
+.settings-placeholder-list {
+  margin-top: var(--ri-space-2);
+  padding-left: var(--ri-space-5);
+  font-family: var(--ri-sans);
+  font-size: var(--ri-text-xs);
+  color: var(--ri-muted);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 4px var(--ri-space-4);
+}
+
+.settings-placeholder-list li {
+  list-style: disc;
 }
 
 /* ─── Meta value (About section) ─────────────────────────────────────────── */

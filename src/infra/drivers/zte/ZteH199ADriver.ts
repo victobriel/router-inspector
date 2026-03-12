@@ -560,6 +560,79 @@ export class ZteH199ADriver extends BaseRouter {
     return !onLoginPage && internetTab instanceof HTMLElement;
   }
 
+  public async ping(ip: string): Promise<string> {
+    await this.clickElementAndWait(
+      this.s.managementTab,
+      this.s.diagnosticsContainer
+    );
+    await this.clickElementAndWait(
+      this.s.diagnosticsContainer,
+      this.s.diagnosticsPingContainer
+    );
+    await this.clickElementAndWait(
+      this.s.diagnosticsPingContainer,
+      this.s.diagnosticsPingIpAddress
+    );
+
+    DomService.updateField(
+      DomService.getValueElement(this.s.diagnosticsPingIpAddress),
+      ip
+    );
+
+    await this.clickElementAndWait(this.s.pingSendButton);
+
+    await this.waitForDisappearance(this.s.pingWaiting, 30000);
+
+    const result = DomService.getOptionalValue(this.s.pingResult);
+    if (!result) {
+      return "Ping failed";
+    }
+
+    return result;
+  }
+
+  private async waitForDisappearance(
+    selector: string,
+    timeoutMs = 10000
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const hasDisappeared = (): boolean => {
+        const el = document.querySelector(selector) as HTMLElement | null;
+        if (!el) return true;
+        const style = window.getComputedStyle(el);
+        return style.display === "none" || style.visibility === "hidden";
+      };
+
+      if (hasDisappeared()) {
+        resolve();
+        return;
+      }
+
+      const observer = new MutationObserver(() => {
+        if (hasDisappeared()) {
+          observer.disconnect();
+          resolve();
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["style", "class"],
+      });
+
+      setTimeout(() => {
+        observer.disconnect();
+        reject(
+          new Error(
+            `Timeout: Element "${selector}" not disappeared after ${timeoutMs}ms`
+          )
+        );
+      }, timeoutMs);
+    });
+  }
+
   public buttonElementConfig(): ButtonConfig | null {
     return {
       targetSelector: "#loginContainer",

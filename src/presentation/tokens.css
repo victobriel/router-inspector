@@ -59,6 +59,9 @@
   --ri-space-6: 1.5rem; /* 24px */
   --ri-space-8: 2rem; /* 32px */
 
+  /* Margin */
+  --ri-margin-3: 0.75rem; /*  12px */
+
   /* Radii */
   --ri-radius: 8px;
   --ri-radius-sm: 5px;
@@ -110,3 +113,4 @@
   --ri-danger-end: #5e0000;
   --ri-warn: #f4b942;
 }
+

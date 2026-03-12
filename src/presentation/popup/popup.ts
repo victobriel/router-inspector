@@ -4,8 +4,9 @@ import { translator } from "../../infra/i18n/I18nService.js";
 
 enum tabElement {
   MAIN = "main",
-  LOGS = "logs",
   TOPOLOGY = "topology",
+  // LOGS = "logs",
+  DIAGNOSTICS = "diagnostics",
 }
 
 function applyPopupTranslations(): void {
@@ -40,7 +41,7 @@ function applyPopupTranslations(): void {
   });
 
   const settingsBtn = document.querySelector<HTMLButtonElement>(
-    ".popup-btn-settings"
+    "#popup-tab-settings"
   );
   if (settingsBtn)
     settingsBtn.setAttribute(
@@ -124,10 +125,10 @@ function applyPopupTranslations(): void {
     "popup-tab-topology"
   ) as HTMLButtonElement | null;
   if (tabTopology) tabTopology.textContent = translator.t("popup_tab_topology");
-  const tabLogs = document.getElementById(
-    "popup-tab-logs"
-  ) as HTMLButtonElement | null;
-  if (tabLogs) tabLogs.textContent = translator.t("popup_tab_logs");
+  // const tabLogs = document.getElementById(
+  //   "popup-tab-logs"
+  // ) as HTMLButtonElement | null;
+  // if (tabLogs) tabLogs.textContent = translator.t("popup_tab_logs");
 
   const sectionTitles = document.querySelectorAll<HTMLElement>(
     "#popup-section-wan .popup-section-title," +
@@ -207,18 +208,22 @@ function applyPopupTranslations(): void {
 
 function setupTabs(): void {
   const tabMain = document.getElementById("popup-tab-main");
-  const tabLogs = document.getElementById("popup-tab-logs");
+  // const tabLogs = document.getElementById("popup-tab-logs");
   const tabTopology = document.getElementById("popup-tab-topology");
+  const tabDiagnostics = document.getElementById("popup-tab-diagnostics");
 
   const panelMain = document.getElementById("popup-panel-main");
-  const panelLogs = document.getElementById("popup-panel-logs");
+  // const panelLogs = document.getElementById("popup-panel-logs");
   const panelTopology = document.getElementById("popup-panel-topology");
+  const panelDiagnostics = document.getElementById("popup-panel-diagnostics");
 
   if (
     !tabMain ||
-    !tabLogs ||
+    // !tabLogs ||
+    !tabDiagnostics ||
     !panelMain ||
-    !panelLogs ||
+    // !panelLogs ||
+    !panelDiagnostics ||
     !tabTopology ||
     !panelTopology
   )
@@ -226,25 +231,32 @@ function setupTabs(): void {
 
   const activate = (target: tabElement): void => {
     const isMain = target === tabElement.MAIN;
-    const isLogs = target === tabElement.LOGS;
     const isTopology = target === tabElement.TOPOLOGY;
+    // const isLogs = target === tabElement.LOGS;
+    const isDiagnostics = target === tabElement.DIAGNOSTICS;
 
     tabMain.classList.toggle("popup-tab--active", isMain);
-    tabLogs.classList.toggle("popup-tab--active", isLogs);
     tabTopology.classList.toggle("popup-tab--active", isTopology);
+    // tabLogs.classList.toggle("popup-tab--active", isLogs);
+    tabDiagnostics.classList.toggle("popup-tab--active", isDiagnostics);
 
     tabMain.setAttribute("aria-selected", String(isMain));
-    tabLogs.setAttribute("aria-selected", String(isLogs));
     tabTopology.setAttribute("aria-selected", String(isTopology));
+    // tabLogs.setAttribute("aria-selected", String(isLogs));
+    tabDiagnostics.setAttribute("aria-selected", String(isDiagnostics));
 
     panelMain.classList.toggle("popup-hidden", !isMain);
-    panelLogs.classList.toggle("popup-hidden", !isLogs);
     panelTopology.classList.toggle("popup-hidden", !isTopology);
+    // panelLogs.classList.toggle("popup-hidden", !isLogs);
+    panelDiagnostics.classList.toggle("popup-hidden", !isDiagnostics);
   };
 
   tabMain.addEventListener("click", () => activate(tabElement.MAIN));
-  tabLogs.addEventListener("click", () => activate(tabElement.LOGS));
   tabTopology.addEventListener("click", () => activate(tabElement.TOPOLOGY));
+  // tabLogs.addEventListener("click", () => activate(tabElement.LOGS));
+  tabDiagnostics.addEventListener("click", () =>
+    activate(tabElement.DIAGNOSTICS)
+  );
 }
 
 /** Section toggle/section id pairs; must match popup.html. */
@@ -298,7 +310,7 @@ function setupSectionToggles(): void {
 }
 
 function setupSettingsButton(): void {
-  const btn = document.querySelector<HTMLButtonElement>(".popup-btn-settings");
+  const btn = document.querySelector<HTMLButtonElement>("#popup-tab-settings");
   if (!btn) return;
   btn.addEventListener("click", () => {
     void chrome.runtime.openOptionsPage();

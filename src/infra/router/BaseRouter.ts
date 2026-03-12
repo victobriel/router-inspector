@@ -57,6 +57,7 @@ export abstract class BaseRouter implements IRouter {
   public abstract extract(): Promise<ExtractionResult>;
   public abstract buttonElementConfig(): ButtonConfig | null;
   public abstract isAuthenticated(): boolean;
+  public abstract ping(ip: string): Promise<string>;
 
   public waitForElement(
     selector: string,

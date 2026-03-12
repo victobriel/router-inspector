@@ -87,12 +87,73 @@
   },
 
   "popup_tab_main": {
-    "message": "Main",
-    "description": "Label of Main tab."
+    "message": "Data",
+    "description": "Label of Data tab."
   },
   "popup_tab_topology": {
     "message": "Topology",
     "description": "Label of Topology tab."
+  },
+  "popup_tab_diagnostics": {
+    "message": "Diagnostic",
+    "description": "Label of Diagnostic tab."
+  },
+  "popup_diagnostics_ping_label": {
+    "message": "Ping",
+    "description": "Label for diagnostics device select."
+  },
+  "popup_diagnostics_device_placeholder": {
+    "message": "Select a device",
+    "description": "Placeholder option for diagnostics device select."
+  },
+  "popup_diagnostics_ping_button": {
+    "message": "Ping",
+    "description": "Label for diagnostics ping button."
+  },
+  "popup_diagnostics_ping_button_aria": {
+    "message": "Start ping test for selected device",
+    "description": "ARIA label for diagnostics ping button."
+  },
+  "popup_diagnostics_result_label": {
+    "message": "Result",
+    "description": "Label for diagnostics ping result text area."
+  },
+  "popup_diagnostics_no_device_selected": {
+    "message": "Select a device to start a ping test",
+    "description": "Message shown when no device is selected for diagnostics ping."
+  },
+  "popup_diagnostics_ping_started": {
+    "message": "Ping test started for $ip$",
+    "description": "Message shown when diagnostics ping is started.",
+    "placeholders": {
+      "ip": {
+        "content": "$1"
+      }
+    }
+  },
+  "popup_diagnostics_ping_success": {
+    "message": "Ping test completed successfully",
+    "description": "Message shown when diagnostics ping is completed successfully."
+  },
+  "popup_diagnostics_mode_internal": {
+    "message": "Internal",
+    "description": "Label for diagnostics mode internal."
+  },
+  "popup_diagnostics_mode_external": {
+    "message": "External",
+    "description": "Label for diagnostics mode external."
+  },
+  "popup_diagnostics_copy_result_button": {
+    "message": "Copy result",
+    "description": "Label for diagnostics copy result button."
+  },
+  "popup_diagnostics_copy_result_button_aria": {
+    "message": "Copy diagnostics result",
+    "description": "ARIA label for diagnostics copy result button."
+  },
+  "popup_tab_reports": {
+    "message": "Report",
+    "description": "Label of Report tab."
   },
   "popup_tab_logs": {
     "message": "Logs",
@@ -352,5 +413,46 @@
   },
   "popup_status_bookmark_removed": {
     "message": "Credential removed from bookmark list"
+  },
+
+  "popup_copy_text": {
+    "message": "Copy text"
+  },
+  "popup_copy_text_aria": {
+    "message": "Copy router info text"
+  },
+  "popup_copy_text_copied": {
+    "message": "Copied!"
+  },
+  "popup_copy_text_copied_aria": {
+    "message": "Router info text copied"
+  },
+  "popup_status_copy_success": {
+    "message": "Router info copied to clipboard"
+  },
+  "popup_error_no_data_to_copy": {
+    "message": "Collect router data before copying"
+  },
+
+  "settings_section_copy_template": {
+    "message": "Copy text template"
+  },
+  "settings_copy_template_label": {
+    "message": "Copy text format"
+  },
+  "settings_copy_template_desc": {
+    "message": "Define the text format used when you click the “Copy text” button in the popup. Placeholders will be replaced with the latest collected values."
+  },
+  "settings_copy_template_hint": {
+    "message": "Available placeholders (click to expand)"
+  },
+  "settings_copy_template_save": {
+    "message": "Save"
+  },
+  "settings_copy_template_toast_saved": {
+    "message": "Saved"
+  },
+  "settings_copy_template_error_empty": {
+    "message": "Provide a format before saving"
   }
 }

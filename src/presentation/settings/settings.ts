@@ -3,6 +3,7 @@ import { ThemeManager } from "../popup/ThemeManager.js";
 import { translator } from "../../infra/i18n/I18nService.js";
 
 import { defaultBookmarksService } from "../../application/BookmarksService.js";
+import { COPY_TEXT_TEMPLATE_STORAGE_KEY } from "../../application/constants/index.js";
 
 let toastTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -100,6 +101,41 @@ async function deleteCredential(
   await defaultBookmarksService.removeCredential(modelKey, credIdx);
   await loadBookmarks();
   showToast(translator.t("settings_toast_credential_removed"), "ok");
+}
+
+async function loadCopyTemplate(): Promise<void> {
+  const textarea = document.getElementById(
+    "settings-copy-template-input"
+  ) as HTMLTextAreaElement | null;
+  if (!textarea) return;
+
+  const stored = await StorageService.get<string>(
+    COPY_TEXT_TEMPLATE_STORAGE_KEY
+  );
+  textarea.value =
+    typeof stored === "string" && stored.trim() !== "" ? stored : "";
+}
+
+function setupCopyTemplate(): void {
+  const textarea = document.getElementById(
+    "settings-copy-template-input"
+  ) as HTMLTextAreaElement | null;
+  const saveBtn = document.getElementById(
+    "settings-copy-template-save"
+  ) as HTMLButtonElement | null;
+
+  if (!textarea || !saveBtn) return;
+
+  saveBtn.addEventListener("click", async () => {
+    const raw = textarea.value.trim();
+    if (!raw) {
+      showToast(translator.t("settings_copy_template_error_empty"), "err");
+      return;
+    }
+
+    await StorageService.save(COPY_TEXT_TEMPLATE_STORAGE_KEY, raw);
+    showToast(translator.t("settings_copy_template_toast_saved"), "ok");
+  });
 }
 
 function setupBookmarksList(): void {
@@ -225,6 +261,8 @@ document.addEventListener("DOMContentLoaded", () => {
     setupAccordion();
     setupBookmarksList();
     setupClearAll();
+    setupCopyTemplate();
     await loadBookmarks();
+    await loadCopyTemplate();
   })();
 });

@@ -112,13 +112,14 @@ export const ExtractionResultSchema = z.object({
 });
 
 export const CollectMessageSchema = z.object({
-  action: z.enum(["authenticate", "collect"], "Invalid action type"),
+  action: z.enum(["authenticate", "collect", "ping"], "Invalid action type"),
   credentials: z
     .object({
       username: z.string(),
       password: z.string(),
     })
     .optional(),
+  ip: z.string().optional(),
 });
 
 export type Credentials = z.infer<typeof CredentialsSchema>;

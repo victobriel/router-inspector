@@ -79,6 +79,98 @@
           </div>
         </section>
 
+        <!-- Copy text template -->
+        <section class="settings-section">
+          <h2
+            class="settings-section-title"
+            data-i18n="settings_section_copy_template"
+          >
+            Copy text template
+          </h2>
+          <div class="settings-card">
+            <div class="settings-row settings-row--stacked">
+              <div class="settings-row-info">
+                <span
+                  class="settings-row-label"
+                  data-i18n="settings_copy_template_label"
+                >
+                </span>
+                <span
+                  class="settings-row-desc"
+                  data-i18n="settings_copy_template_desc"
+                >
+                </span>
+              </div>
+              <textarea
+                id="settings-copy-template-input"
+                class="settings-textarea"
+                rows="8"
+                spellcheck="false"
+                placeholder="Router version: %RouterVersion%&#10;TR-069 status: %TR069Status%"
+              ></textarea>
+              <details class="settings-placeholder-accordion">
+                <summary
+                  class="settings-row-hint"
+                  data-i18n="settings_copy_template_hint"
+                ></summary>
+                <ul class="settings-placeholder-list">
+                  <li>%RouterVersion%</li>
+                  <li>%TR069Url%</li>
+                  <li>%InternetStatus%</li>
+                  <li>%TR069Status%</li>
+                  <li>%PPPoEUsername%</li>
+                  <li>%IpVersion%</li>
+                  <li>%LinkMode%</li>
+                  <li>%RequestPdStatus%</li>
+                  <li>%SlaacStatus%</li>
+                  <li>%Dhcpv6Status%</li>
+                  <li>%PdStatus%</li>
+                  <li>%RemoteAccessIpv4Status%</li>
+                  <li>%RemoteAccessIpv6Status%</li>
+                  <li>%BandSteeringStatus%</li>
+                  <li>%Wlan24Status%</li>
+                  <li>%Wlan24Channel%</li>
+                  <li>%Wlan24Mode%</li>
+                  <li>%Wlan24BandWidth%</li>
+                  <li>%Wlan24TransmittingPower%</li>
+                  <li>%Wlan24SsidName%</li>
+                  <li>%Wlan24SsidPassword%</li>
+                  <li>%Wlan24SsidHideMode%</li>
+                  <li>%Wlan24Wpa2SecurityType%</li>
+                  <li>%Wlan24MaxClients%</li>
+                  <li>%Wlan5Status%</li>
+                  <li>%Wlan5Channel%</li>
+                  <li>%Wlan5Mode%</li>
+                  <li>%Wlan5BandWidth%</li>
+                  <li>%Wlan5TransmittingPower%</li>
+                  <li>%Wlan5SsidName%</li>
+                  <li>%Wlan5SsidPassword%</li>
+                  <li>%Wlan5SsidHideMode%</li>
+                  <li>%Wlan5Wpa2SecurityType%</li>
+                  <li>%Wlan5MaxClients%</li>
+                  <li>%DhcpStatus%</li>
+                  <li>%DhcpIpAddress%</li>
+                  <li>%DhcpSubnetMask%</li>
+                  <li>%DhcpStartIp%</li>
+                  <li>%DhcpEndIp%</li>
+                  <li>%DhcpIspDnsStatus%</li>
+                  <li>%DhcpPrimaryDns%</li>
+                  <li>%DhcpSecondaryDns%</li>
+                  <li>%DhcpLeaseTimeMode%</li>
+                  <li>%DhcpLeaseTime%</li>
+                  <li>%UpnpStatus%</li>
+                </ul>
+              </details>
+              <button
+                class="settings-btn"
+                id="settings-copy-template-save"
+                type="button"
+                data-i18n="settings_copy_template_save"
+              ></button>
+            </div>
+          </div>
+        </section>
+
         <!-- Data & Storage -->
         <section class="settings-section">
           <h2

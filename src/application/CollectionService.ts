@@ -11,7 +11,7 @@ export class CollectionService {
     message: CollectMessage
   ): Promise<CollectResponse> {
     const router = RouterFactory.create();
-    const { action, credentials } = message;
+    const { action, credentials, ip } = message;
 
     const actions = {
       collect: async () => await this.executeExtraction(router),
@@ -54,6 +54,29 @@ export class CollectionService {
         return {
           success: true,
           message: "Authentication in progress",
+        };
+      },
+      ping: async () => {
+        if (!router.isAuthenticated()) {
+          return {
+            success: false,
+            message:
+              "Router is not authenticated. Please authenticate before running diagnostics.",
+          };
+        }
+
+        if (!ip) {
+          return {
+            success: false,
+            message: "IP address is required for ping diagnostics.",
+          };
+        }
+
+        const result = await router.ping(ip);
+
+        return {
+          success: true,
+          message: result,
         };
       },
     };

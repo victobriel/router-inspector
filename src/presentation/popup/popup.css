@@ -29,7 +29,7 @@ body {
   background-color: var(--ri-bg-base);
   color: var(--ri-text);
   font-family: var(--ri-sans);
-  font-size: 12px;
+  font-size: var(--ri-text-sm);
   line-height: 1.5;
   overflow-x: hidden;
   overflow-y: auto;
@@ -157,22 +157,37 @@ h1 {
 /* ─── Tabs ───────────────────────────────────────────────────────────────── */
 .popup-tabs {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  padding-bottom: 4px;
+  grid-template-columns: repeat(3, 1fr) auto;
+  gap: 1px;
+  padding: var(--ri-space-1) 18px;
+  background: var(--ri-bg-surface);
+  border-bottom: 1px solid var(--ri-border);
 }
 
 .popup-tab {
-  background: var(--ri-bg-card);
-  border-color: var(--ri-border);
-  border-style: solid;
-  border-width: 0 0 2px;
+  display: flex;
+  align-items: center;
+  gap: var(--ri-space-2);
+  justify-content: flex-center;
+  border-bottom: 1px solid transparent;
+  width: 100%;
+  background: transparent;
+  border: 0;
   color: var(--ri-muted);
   font-family: var(--ri-mono);
-  font-size: var(--ri-text-xs);
+  font-size: var(--ri-text-sm);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 10px var(--ri-space-2);
+  padding: 8px 12px;
   cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.popup-tab:hover {
+  color: var(--ri-text);
 }
 
 .popup-tab:focus-visible,
@@ -183,9 +198,7 @@ h1 {
 }
 
 .popup-tab.popup-tab--active {
-  border-color: var(--ri-accent2);
-  color: var(--ri-accent2);
-  background: var(--ri-accent2-dim);
+  border-bottom: 1px solid var(--ri-accent2);
 }
 
 /* ─── Panel ──────────────────────────────────────────────────────────────── */
@@ -318,6 +331,14 @@ h1 {
   gap: 4px;
 }
 
+.popup-field-label {
+  font-family: var(--ri-mono);
+  font-size: var(--ri-text-xs);
+  color: var(--ri-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .popup-label {
   font-family: var(--ri-mono);
   font-size: var(--ri-text-xs);
@@ -348,6 +369,92 @@ h1 {
 .popup-input:focus {
   border-color: var(--ri-accent2);
   box-shadow: 0 0 0 2px var(--ri-accent2-dim);
+}
+
+/* ─── Diagnostics ─────────────────────────────────────────────────────────── */
+.popup-diagnostics {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ri-space-4);
+}
+
+.popup-diagnostics-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.popup-diagnostics-mode {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  background: var(--ri-bg-card);
+  border-radius: var(--ri-radius);
+  padding: 2px;
+  border: 1px solid var(--ri-border);
+  width: 100%;
+}
+
+.popup-diagnostics-mode-option {
+  position: relative;
+  border: none;
+  background: transparent;
+  color: var(--ri-muted);
+  font-family: var(--ri-mono);
+  font-size: var(--ri-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 4px 10px;
+  border-radius: var(--ri-radius-sm);
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+  width: 50%;
+}
+
+.popup-diagnostics-mode-option--active {
+  background: linear-gradient(
+    135deg,
+    var(--ri-accent2-dim) 0%,
+    var(--ri-accent2) 100%
+  );
+  color: var(--ri-text);
+  box-shadow: 0 0 0 1px var(--ri-accent2-dim);
+}
+
+.popup-diagnostics-mode-option:focus-visible {
+  outline: 2px solid var(--ri-accent2);
+  outline-offset: 2px;
+}
+
+.popup-diagnostics-output {
+  width: 100%;
+  height: 140px;
+  resize: none;
+  background: var(--ri-bg-card);
+  border: 1px solid var(--ri-border);
+  border-radius: var(--ri-radius-sm);
+  padding: var(--ri-space-2);
+  color: var(--ri-muted);
+  font-family: var(--ri-mono);
+  font-size: var(--ri-text-xs);
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.popup-diagnostics-output:focus-visible {
+  outline: none;
+  outline-offset: none;
+}
+
+.popup-btn-ping {
+  background-color: var(--ri-accent2);
+  color: var(--ri-text);
+}
+
+.popup-btn-copy-result {
 }
 
 /* ─── Icons ──────────────────────────────────────────────────────────────── */
@@ -472,15 +579,6 @@ h1 {
   color: var(--ri-text);
 }
 
-.popup-btn-settings {
-  background-color: transparent;
-  color: var(--ri-muted);
-}
-
-.popup-btn-settings:hover {
-  color: var(--ri-text);
-}
-
 .popup-btn-close {
   background-color: transparent;
   color: var(--ri-muted);
@@ -492,6 +590,16 @@ h1 {
 
 .popup-already-auth-label {
   color: var(--ri-warn);
+}
+
+.popup-btn-copy-text {
+  margin-top: var(--ri-margin-3);
+  background: linear-gradient(
+    135deg,
+    var(--ri-accent) 0%,
+    var(--ri-accent-glow) 100%
+  );
+  color: var(--ri-text);
 }
 
 /* ─── Actions ────────────────────────────────────────────────────────────── */
@@ -640,7 +748,7 @@ h1 {
 
 .popup-card-value {
   font-family: var(--ri-mono);
-  font-size: var(--ri-text-xs);
+  font-size: var(--ri-text-sm);
   font-weight: 600;
   color: var(--ri-accent);
   word-break: break-all;
@@ -668,7 +776,7 @@ h1 {
 /* ─── Log panel ──────────────────────────────────────────────────────────── */
 .popup-log-panel {
   padding: 2px 2px 4px;
-  height: calc(100vh - 394px);
+  height: calc(100vh - 410px);
   overflow-y: auto;
   display: flex;
   flex-direction: column;

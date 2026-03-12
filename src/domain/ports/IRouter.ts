@@ -18,4 +18,5 @@ export interface IRouter {
   extract(): Promise<ExtractionResult>;
   buttonElementConfig(): ButtonConfig | null;
   isAuthenticated(): boolean;
+  ping(ip: string): Promise<string>;
 }
