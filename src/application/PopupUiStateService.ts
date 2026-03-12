@@ -28,7 +28,7 @@ export class PopupUiStateService {
 
   private tabKey(baseKey: string, tabId: number | null): string | null {
     if (tabId === null) return null;
-    return `${baseKey}:${tabId}`;
+    return `${baseKey}:${String(tabId)}`;
   }
 
   public async loadUiState(tabId: number | null): Promise<PopupUiState | null> {

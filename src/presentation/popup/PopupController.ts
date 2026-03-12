@@ -606,7 +606,7 @@ export class PopupController {
 
   private getTabStorageKey(baseKey: string): string | null {
     if (this.activeTabId === null) return null;
-    return `${baseKey}-${this.activeTabId}`;
+    return `${baseKey}:${String(this.activeTabId)}`;
   }
 
   private async loadBookmarks(): Promise<void> {

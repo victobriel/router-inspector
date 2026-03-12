@@ -34,7 +34,7 @@ class ExtensionManager {
       };
     }
 
-    const storageKey = `${LAST_DATA_STORAGE_KEY}-${tabId}`;
+    const storageKey = `${LAST_DATA_STORAGE_KEY}:${String(tabId)}`;
     const value: ExtractionResult = parsed.data;
     await StorageService.save(storageKey, value, 24 * 60 * 1000);
 
@@ -56,7 +56,7 @@ class ExtensionManager {
       return { success: false, message: "Invalid router model" };
     }
 
-    const storageKey = `${ROUTER_MODEL_STORAGE_KEY}-${tabId}`;
+    const storageKey = `${ROUTER_MODEL_STORAGE_KEY}:${String(tabId)}`;
     await StorageService.save(storageKey, model);
 
     return { success: true };
