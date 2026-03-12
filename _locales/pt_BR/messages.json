@@ -54,7 +54,7 @@
   "popup_section_dhcp": { "message": "DHCP" },
   "popup_section_upnp": { "message": "UPnP" },
   "popup_section_router_version": { "message": "Versão do roteador" },
-  "popup_section_tr069_url": { "message": "URL TR069" },
+  "popup_section_tr069": { "message": "TR069" },
 
   "popup_label_status": { "message": "Status" },
   "popup_label_channel": { "message": "Canal" },
@@ -63,8 +63,8 @@
   "popup_label_mode": { "message": "Modo" },
   "popup_label_ssid_name": { "message": "Nome da SSID" },
   "popup_label_ssid_password": { "message": "Senha da SSID" },
-  "popup_label_ssid_hide_mode": { "message": "Modo de ocultação da SSID" },
-  "popup_label_wpa2_security": { "message": "Segurança WPA2" },
+  "popup_label_ssid_hide_mode": { "message": "Modo Oculto" },
+  "popup_label_wpa2_security": { "message": "Encriptação" },
   "popup_label_max_clients": { "message": "Máx. de clientes" },
   "popup_label_ip_address": { "message": "Endereço IP" },
   "popup_label_subnet_mask": { "message": "Máscara de sub-rede" },
@@ -153,20 +153,20 @@
     }
   },
 
-  "popup_label_link_speed": { "message": "Velocidade do link" },
-  "popup_label_ip_version": { "message": "Versão de IP" },
-  "popup_label_dhcpv6_status": { "message": "Status do DHCPv6" },
-  "popup_label_pd_status": { "message": "Status de PD" },
-  "popup_label_slaac_status": { "message": "Status do SLAAC" },
-  "popup_label_gua_pd_status": { "message": "Status do GUA PD" },
+  "popup_label_ethernet_mode": { "message": "Modo" },
+  "popup_label_ip_version": { "message": "Versão IP" },
+  "popup_label_dhcpv6_status": { "message": "DHCPv6" },
+  "popup_label_pd_status": { "message": "PD" },
+  "popup_label_slaac_status": { "message": "SLAAC" },
+  "popup_label_gua_pd_status": { "message": "Gua PD" },
   "popup_label_remote_access_ipv4": {
-    "message": "Acesso remoto - IPv4"
+    "message": "IPv4 - Acesso remoto"
   },
   "popup_label_remote_access_ipv6": {
-    "message": "Acesso remoto - IPv6"
+    "message": "IPv6 - Acesso remoto"
   },
-  "popup_label_isp_dns_enabled": { "message": "DNS do provedor ativado" },
-  "popup_label_lease_time_mode": { "message": "Modo do tempo de concessão" },
+  "popup_label_isp_dns_enabled": { "message": "ISP DNS Status" },
+  "popup_label_lease_time_mode": { "message": "Modo de tempo de concessão" },
   "popup_label_lease_time": { "message": "Tempo de concessão" },
   "popup_label_version": { "message": "Versão" },
   "popup_label_url": { "message": "URL" },

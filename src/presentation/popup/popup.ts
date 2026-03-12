@@ -51,16 +51,12 @@ function applyPopupTranslations(): void {
     "popup-btn-close"
   ) as HTMLButtonElement | null;
   if (closeBtn)
-    closeBtn.setAttribute(
-      "aria-label",
-      translator.t("popup_close_aria_label")
-    );
+    closeBtn.setAttribute("aria-label", translator.t("popup_close_aria_label"));
 
   const statusText = document.getElementById(
     "popup-status-text"
   ) as HTMLElement | null;
-  if (statusText)
-    statusText.textContent = translator.t("popup_status_ready");
+  if (statusText) statusText.textContent = translator.t("popup_status_ready");
 
   const modelLabel = document.querySelector<HTMLElement>(".popup-model-label");
   if (modelLabel) modelLabel.textContent = translator.t("popup_model_label");
@@ -81,7 +77,9 @@ function applyPopupTranslations(): void {
     'label[for="popup-input-password"]'
   );
   if (passwordLabel)
-    passwordLabel.textContent = translator.t("popup_credentials_password_label");
+    passwordLabel.textContent = translator.t(
+      "popup_credentials_password_label"
+    );
 
   const savedCredsTitle = document.querySelector<HTMLElement>(
     ".popup-saved-credentials-title"
@@ -92,17 +90,13 @@ function applyPopupTranslations(): void {
   const collectBtn = document.getElementById(
     "popup-btn-collect"
   ) as HTMLButtonElement | null;
-  if (collectBtn)
-    collectBtn.textContent = translator.t("popup_collect_start");
+  if (collectBtn) collectBtn.textContent = translator.t("popup_collect_start");
 
   const clearBtn = document.getElementById(
     "popup-btn-clear"
   ) as HTMLButtonElement | null;
   if (clearBtn)
-    clearBtn.setAttribute(
-      "aria-label",
-      translator.t("popup_clear_aria_label")
-    );
+    clearBtn.setAttribute("aria-label", translator.t("popup_clear_aria_label"));
 
   // Generic text translations for labels using data-i18n
   const textNodes = document.querySelectorAll<HTMLElement>("[data-i18n]");
@@ -129,8 +123,7 @@ function applyPopupTranslations(): void {
   const tabTopology = document.getElementById(
     "popup-tab-topology"
   ) as HTMLButtonElement | null;
-  if (tabTopology)
-    tabTopology.textContent = translator.t("popup_tab_topology");
+  if (tabTopology) tabTopology.textContent = translator.t("popup_tab_topology");
   const tabLogs = document.getElementById(
     "popup-tab-logs"
   ) as HTMLButtonElement | null;
@@ -145,7 +138,7 @@ function applyPopupTranslations(): void {
       "#popup-section-dhcp .popup-section-title," +
       "#popup-section-upnp .popup-section-title," +
       "#popup-section-router-version .popup-section-title," +
-      "#popup-section-tr069-url .popup-section-title"
+      "#popup-section-tr069 .popup-section-title"
   );
   sectionTitles.forEach((el) => {
     const parentId = el.closest("section")?.id;
@@ -174,8 +167,8 @@ function applyPopupTranslations(): void {
       case "popup-section-router-version":
         el.textContent = translator.t("popup_section_router_version");
         break;
-      case "popup-section-tr069-url":
-        el.textContent = translator.t("popup_section_tr069_url");
+      case "popup-section-tr069":
+        el.textContent = translator.t("popup_section_tr069");
         break;
       default:
         break;
@@ -276,7 +269,7 @@ const SECTION_IDS = [
     toggleId: "popup-toggle-router-version",
     sectionId: "popup-section-router-version",
   },
-  { toggleId: "popup-toggle-tr069-url", sectionId: "popup-section-tr069-url" },
+  { toggleId: "popup-toggle-tr069", sectionId: "popup-section-tr069" },
   {
     toggleId: "popup-toggle-topology-cable",
     sectionId: "popup-section-topology-cable",

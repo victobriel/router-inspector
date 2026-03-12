@@ -131,9 +131,9 @@
     "message": "Router Version",
     "description": "Router version section title."
   },
-  "popup_section_tr069_url": {
-    "message": "TR069 URL",
-    "description": "TR069 URL section title."
+  "popup_section_tr069": {
+    "message": "TR069",
+    "description": "TR069 section title."
   },
 
   "popup_label_status": { "message": "Status" },
@@ -143,8 +143,8 @@
   "popup_label_mode": { "message": "Mode" },
   "popup_label_ssid_name": { "message": "SSID Name" },
   "popup_label_ssid_password": { "message": "SSID Password" },
-  "popup_label_ssid_hide_mode": { "message": "SSID Hide Mode" },
-  "popup_label_wpa2_security": { "message": "WPA2-Security" },
+  "popup_label_ssid_hide_mode": { "message": "Hide Mode" },
+  "popup_label_wpa2_security": { "message": "Encryption" },
   "popup_label_max_clients": { "message": "Max. Clients" },
   "popup_label_ip_address": { "message": "IP Address" },
   "popup_label_subnet_mask": { "message": "Subnet Mask" },
@@ -251,15 +251,15 @@
     }
   },
 
-  "popup_label_link_speed": { "message": "Link Speed" },
+  "popup_label_ethernet_mode": { "message": "Mode" },
   "popup_label_ip_version": { "message": "IP Version" },
-  "popup_label_dhcpv6_status": { "message": "DHCPv6 Status" },
-  "popup_label_pd_status": { "message": "PD Status" },
-  "popup_label_slaac_status": { "message": "SLAAC Status" },
-  "popup_label_gua_pd_status": { "message": "Gua PD Status" },
-  "popup_label_remote_access_ipv4": { "message": "Remote access - IPv4" },
-  "popup_label_remote_access_ipv6": { "message": "Remote access - IPv6" },
-  "popup_label_isp_dns_enabled": { "message": "ISP DNS Enabled" },
+  "popup_label_dhcpv6_status": { "message": "DHCPv6" },
+  "popup_label_pd_status": { "message": "PD" },
+  "popup_label_slaac_status": { "message": "SLAAC" },
+  "popup_label_gua_pd_status": { "message": "Gua PD" },
+  "popup_label_remote_access_ipv4": { "message": "IPv4 - Remote access" },
+  "popup_label_remote_access_ipv6": { "message": "IPv6 - Remote access" },
+  "popup_label_isp_dns_enabled": { "message": "ISP DNS Status" },
   "popup_label_lease_time_mode": { "message": "Lease Time Mode" },
   "popup_label_lease_time": { "message": "Lease Time" },
   "popup_label_version": { "message": "Version" },
