@@ -3,8 +3,13 @@ import type {
   ButtonConfig,
   Credentials,
   ExtractionResult,
+  PingTestResult,
 } from "../../domain/schemas/validation.js";
 import type { IRouter } from "../../domain/ports/IRouter.js";
+import {
+  DEFAULT_MAX_WAIT_AFTER_CLICK_MS,
+  DEFAULT_MAX_WAIT_AFTER_DISAPPEARANCE_MS,
+} from "../drivers/zte/constants.js";
 
 /**
  * Abstract base for router adapters: shared DOM waiting/click behavior.
@@ -12,7 +17,6 @@ import type { IRouter } from "../../domain/ports/IRouter.js";
  */
 export abstract class BaseRouter implements IRouter {
   private static readonly CLICK_SETTLE_MS = 150;
-  private static readonly DEFAULT_WAIT_AFTER_CLICK_MS = 500;
 
   private readonly name: string;
 
@@ -57,7 +61,7 @@ export abstract class BaseRouter implements IRouter {
   public abstract extract(): Promise<ExtractionResult>;
   public abstract buttonElementConfig(): ButtonConfig | null;
   public abstract isAuthenticated(): boolean;
-  public abstract ping(ip: string): Promise<string>;
+  public abstract ping(ip: string): Promise<PingTestResult | null>;
 
   public waitForElement(
     selector: string,
@@ -93,13 +97,12 @@ export abstract class BaseRouter implements IRouter {
   protected async clickElementAndWait(
     sectionSelector: string,
     waitForSelector?: string,
-    delayMs?: number
+    maxWaitMs: number = DEFAULT_MAX_WAIT_AFTER_CLICK_MS
   ): Promise<void> {
     const section = DomService.getElement(sectionSelector, HTMLElement);
     DomService.safeClick(section);
 
     const targetSelector = waitForSelector ?? sectionSelector;
-    const maxWaitMs = delayMs ?? BaseRouter.DEFAULT_WAIT_AFTER_CLICK_MS;
 
     await this.delay(BaseRouter.CLICK_SETTLE_MS);
 
@@ -112,6 +115,48 @@ export abstract class BaseRouter implements IRouter {
     if (!resolved) {
       await elementPromise;
     }
+  }
+
+  protected async waitForDisappearance(
+    selector: string,
+    maxWaitMs: number = DEFAULT_MAX_WAIT_AFTER_DISAPPEARANCE_MS
+  ): Promise<void> {
+    return new Promise((resolve, reject) => {
+      const hasDisappeared = (): boolean => {
+        const el = document.querySelector(selector) as HTMLElement | null;
+        if (!el) return true;
+        const style = window.getComputedStyle(el);
+        return style.display === "none" || style.visibility === "hidden";
+      };
+
+      if (hasDisappeared()) {
+        resolve();
+        return;
+      }
+
+      const observer = new MutationObserver(() => {
+        if (hasDisappeared()) {
+          observer.disconnect();
+          resolve();
+        }
+      });
+
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["style", "class"],
+      });
+
+      setTimeout(() => {
+        observer.disconnect();
+        reject(
+          new Error(
+            `Timeout: Element "${selector}" not disappeared after ${maxWaitMs}ms`
+          )
+        );
+      }, maxWaitMs);
+    });
   }
 
   protected delay(ms: number): Promise<void> {

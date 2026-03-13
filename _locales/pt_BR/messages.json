@@ -74,6 +74,9 @@
   "popup_diagnostics_ping_success": {
     "message": "Teste de ping concluído com sucesso"
   },
+  "popup_diagnostics_ping_error": {
+    "message": "Teste de ping falhou"
+  },
   "popup_diagnostics_mode_internal": {
     "message": "Interno",
     "description": "Label for diagnostics mode internal."

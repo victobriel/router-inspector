@@ -47,13 +47,11 @@ export class DomService {
   public static getSelectedOptionText(selector: string): string | null {
     const element = document.querySelector(selector);
     if (!(element instanceof HTMLSelectElement)) return null;
-
     const option =
       element.selectedOptions[0] ??
       (element.selectedIndex >= 0
         ? element.options[element.selectedIndex]
         : null);
-
     if (!option) return null;
     return (option.textContent ?? "").trim();
   }
@@ -94,7 +92,6 @@ export class DomService {
         ?.trimStart()
         .toLowerCase()
         .startsWith("javascript:");
-
     if (isJavascriptHref) {
       element.addEventListener("click", (e) => e.preventDefault(), {
         capture: true,
@@ -105,7 +102,6 @@ export class DomService {
       );
       return;
     }
-
     try {
       element.click();
     } catch {

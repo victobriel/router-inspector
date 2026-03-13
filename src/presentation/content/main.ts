@@ -1,8 +1,12 @@
 import { ZodError } from "zod";
 
-import { CollectionService } from "../../application/CollectionService.js";
 import { ContentPageUseCase } from "../../application/ContentPageUseCase.js";
 import { CollectMessageSchema } from "../../domain/schemas/validation.js";
+import { CollectionService } from "../../application/CollectionService.js";
+import {
+  ContentPageMessageAction,
+  type ContentPageMessage,
+} from "../popup/index.js";
 
 // --- Overlay management ---
 let overlayContainer: HTMLDivElement | null = null;
@@ -82,62 +86,67 @@ function toggleOverlay(): void {
 }
 
 // --- Message listener ---
-chrome.runtime.onMessage.addListener((rawMessage, _sender, sendResponse) => {
-  const action = (rawMessage as { action?: string })?.action;
+chrome.runtime.onMessage.addListener(
+  (rawMessage: ContentPageMessage, _sender, sendResponse) => {
+    const action = rawMessage.action;
 
-  if (action === "showOverlay") {
-    showOverlay();
-    sendResponse({ success: true });
-    return false;
-  }
+    const actions = {
+      [ContentPageMessageAction.SHOW_OVERLAY]: () => {
+        showOverlay();
+        sendResponse({ success: true });
+        return false;
+      },
+      [ContentPageMessageAction.HIDE_OVERLAY]: () => {
+        hideOverlay();
+        sendResponse({ success: true });
+        return false;
+      },
+      [ContentPageMessageAction.TOGGLE_OVERLAY]: () => {
+        toggleOverlay();
+        sendResponse({ success: true });
+        return false;
+      },
+      [ContentPageMessageAction.FILL_LOGIN_FIELDS]: () => {
+        const { credentials } = rawMessage;
+        if (credentials) {
+          ContentPageUseCase.fillLoginFieldsWithCredentials(
+            credentials.username,
+            credentials.password
+          );
+        }
+        sendResponse({ success: true });
+        return false;
+      },
+    };
 
-  if (action === "hideOverlay") {
-    hideOverlay();
-    sendResponse({ success: true });
-    return false;
-  }
-
-  if (action === "toggleOverlay") {
-    toggleOverlay();
-    sendResponse({ success: true });
-    return false;
-  }
-
-  if (action === "fillLoginFields") {
-    const { credentials } = rawMessage;
-    if (credentials) {
-      ContentPageUseCase.fillLoginFieldsWithCredentials(
-        credentials.username,
-        credentials.password
-      );
+    if (action in actions) {
+      return actions[action]();
     }
-    sendResponse({ success: true });
-    return false;
-  }
 
-  const result = CollectMessageSchema.safeParse(rawMessage);
+    const result = CollectMessageSchema.safeParse(rawMessage);
 
-  if (!result.success) {
-    return false;
-  }
+    if (!result.success) {
+      return false;
+    }
 
-  CollectionService.handleCollect(result.data)
-    .then(sendResponse)
-    .catch((error) => {
-      if (error instanceof ZodError) {
-        const message = error.issues.map((issue) => issue.message).join("; ");
-        sendResponse({ success: false, message });
-        return;
-      }
+    CollectionService.handleCollect(result.data)
+      .then(sendResponse)
+      .catch((error) => {
+        if (error instanceof ZodError) {
+          const message = error.issues.map((issue) => issue.message).join("; ");
+          sendResponse({ success: false, message });
+          return;
+        }
 
-      sendResponse({
-        success: false,
-        message: error instanceof Error ? error.message : "Unknown error",
+        sendResponse({
+          success: false,
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       });
-    });
 
-  return true;
-});
+    return true;
+  }
+);
 
 window.addEventListener("load", () => {
   void ContentPageUseCase.bootstrap();

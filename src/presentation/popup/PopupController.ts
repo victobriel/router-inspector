@@ -4,14 +4,18 @@ import {
   ROUTER_MODEL_STORAGE_KEY,
   COPY_TEXT_TEMPLATE_STORAGE_KEY,
   LAST_EXTERNAL_IP_STORAGE_KEY,
+  LAST_INTERNAL_PING_TEST_STORAGE_KEY,
+  LAST_EXTERNAL_PING_TEST_STORAGE_KEY,
 } from "../../application/constants/index.js";
 import { PopupStatusType } from "../../application/types/index.js";
 import {
+  CollectMessageAction,
   ExtractionResultSchema,
+  type CollectMessage,
   type ExtractionResult,
+  type PingTestResult,
 } from "../../domain/schemas/validation.js";
 import { DomService } from "../../infra/dom/DomService.js";
-import { StorageService } from "../../infra/storage/StorageService.js";
 
 import { PopupView } from "./PopupView.js";
 
@@ -27,13 +31,21 @@ import type {
   CredentialBookmark,
 } from "../../application/types/index.js";
 import { translator } from "../../infra/i18n/I18nService.js";
+import { defaultTabMessenger } from "../../infra/tabs/ChromeTabMessenger.js";
+import { ContentPageMessageAction } from "./index.js";
+import { StorageService } from "../../infra/storage/StorageService.js";
+import { SessionStorageService } from "../../infra/storage/SessionStorageService.js";
+import { DiagnosticsMode } from "../../domain/schemas/validation.js";
 
 /** Presentation controller: drives popup UI and Chrome messaging. */
 export class PopupController {
   private currentData: ExtractionResult | null = null;
+  private currentInternalPingResult: PingTestResult | null = null;
+  private currentExternalPingResult: PingTestResult | null = null;
   private activeTabId: number | null = null;
   private routerModel: string | null = null;
   private copyButtonResetTimeout: number | null = null;
+  private currentDiagnosticsMode: DiagnosticsMode = DiagnosticsMode.INTERNAL;
   private diagnosticsSelectElement: HTMLSelectElement | null = null;
   private diagnosticsInputElement: HTMLInputElement | null = null;
   private persistedStatus: { type: PopupStatusType; text: string } = {
@@ -120,11 +132,11 @@ export class PopupController {
     ) as HTMLButtonElement | null;
 
     internalModeButton?.addEventListener("click", () => {
-      this.setDiagnosticsMode("internal");
+      this.setDiagnosticsMode(DiagnosticsMode.INTERNAL);
     });
 
     externalModeButton?.addEventListener("click", () => {
-      this.setDiagnosticsMode("external");
+      this.setDiagnosticsMode(DiagnosticsMode.EXTERNAL);
     });
   }
 
@@ -272,6 +284,40 @@ export class PopupController {
 
       // UPnP
       UpnpStatus: boolText(data.upnpEnabled),
+
+      // Last internal ping
+      LastInternalPingMessage: asText(this.currentInternalPingResult?.message),
+      LastInternalPingIp: asText(this.currentInternalPingResult?.ip),
+      LastInternalPingBytes: asText(this.currentInternalPingResult?.bytes),
+      LastInternalPingTtl: asText(this.currentInternalPingResult?.ttl),
+      LastInternalPingMinAvgMax: asText(
+        "min/avg/max: " +
+          [
+            this.currentInternalPingResult?.packets.min,
+            this.currentInternalPingResult?.packets.avg,
+            this.currentInternalPingResult?.packets.max,
+          ].join("/")
+      ),
+      LastInternalPingMin: asText(this.currentInternalPingResult?.packets.min),
+      LastInternalPingAvg: asText(this.currentInternalPingResult?.packets.avg),
+      LastInternalPingMax: asText(this.currentInternalPingResult?.packets.max),
+
+      // Last external ping
+      LastExternalPingMessage: asText(this.currentExternalPingResult?.message),
+      LastExternalPingIp: asText(this.currentExternalPingResult?.ip),
+      LastExternalPingBytes: asText(this.currentExternalPingResult?.bytes),
+      LastExternalPingTtl: asText(this.currentExternalPingResult?.ttl),
+      LastExternalPingMinAvgMax: asText(
+        "min/avg/max: " +
+          [
+            this.currentExternalPingResult?.packets.min,
+            this.currentExternalPingResult?.packets.avg,
+            this.currentExternalPingResult?.packets.max,
+          ].join("/")
+      ),
+      LastExternalPingMin: asText(this.currentExternalPingResult?.packets.min),
+      LastExternalPingAvg: asText(this.currentExternalPingResult?.packets.avg),
+      LastExternalPingMax: asText(this.currentExternalPingResult?.packets.max),
     };
 
     return template.replace(
@@ -303,8 +349,11 @@ export class PopupController {
     }
 
     try {
-      const response = await chrome.tabs.sendMessage(tab.id, {
-        action: "authenticate",
+      const response = await defaultTabMessenger.sendToTab<
+        CollectMessage,
+        CollectResponse
+      >(tab.id, {
+        action: CollectMessageAction.AUTHENTICATE,
         credentials: { username: user, password: pass },
       });
 
@@ -353,8 +402,11 @@ export class PopupController {
       );
 
       try {
-        const res = await chrome.tabs.sendMessage(tabId, {
-          action: "collect",
+        const res = await defaultTabMessenger.sendToTab<
+          CollectMessage,
+          CollectResponse
+        >(tabId, {
+          action: CollectMessageAction.COLLECT,
         });
 
         if (res?.success) {
@@ -624,13 +676,10 @@ export class PopupController {
       return;
     }
 
-    const storageKey = this.getTabStorageKey(LAST_EXTERNAL_IP_STORAGE_KEY);
-    if (storageKey === null) {
-      return;
-    }
-
     try {
-      const lastIp = await StorageService.get<string>(storageKey);
+      const lastIp = await StorageService.get<string>(
+        LAST_EXTERNAL_IP_STORAGE_KEY
+      );
       if (typeof lastIp === "string" && lastIp.trim() !== "") {
         this.diagnosticsInputElement.value = lastIp;
         this.setPingButtonEnabled(true);
@@ -640,7 +689,7 @@ export class PopupController {
     }
   }
 
-  private setDiagnosticsMode(mode: "internal" | "external"): void {
+  private setDiagnosticsMode(mode: DiagnosticsMode): void {
     const internalButton = document.getElementById(
       "popup-diagnostics-mode-internal"
     ) as HTMLButtonElement | null;
@@ -649,7 +698,7 @@ export class PopupController {
     ) as HTMLButtonElement | null;
 
     if (internalButton && externalButton) {
-      if (mode === "internal") {
+      if (mode === DiagnosticsMode.INTERNAL) {
         internalButton.classList.add("popup-diagnostics-mode-option--active");
         externalButton.classList.remove(
           "popup-diagnostics-mode-option--active"
@@ -662,12 +711,14 @@ export class PopupController {
       }
     }
 
+    this.currentDiagnosticsMode = mode;
+
     const container = document.getElementById(
       "popup-diagnostics-device-container"
     ) as HTMLDivElement | null;
     if (!container) return;
 
-    if (mode === "internal") {
+    if (mode === DiagnosticsMode.INTERNAL) {
       if (!this.diagnosticsSelectElement) {
         const select = document.createElement("select");
         select.id = "popup-diagnostics-device-select";
@@ -769,10 +820,7 @@ export class PopupController {
 
     // Persist last external IP when in external diagnostics mode (input field)
     if (select instanceof HTMLInputElement) {
-      const storageKey = this.getTabStorageKey(LAST_EXTERNAL_IP_STORAGE_KEY);
-      if (storageKey !== null) {
-        void StorageService.save(storageKey, ip);
-      }
+      void StorageService.save(LAST_EXTERNAL_IP_STORAGE_KEY, ip);
     }
 
     output.value = translator.t("popup_diagnostics_ping_started", ip);
@@ -792,12 +840,15 @@ export class PopupController {
         return;
       }
 
-      const response = await chrome.tabs.sendMessage(tab.id, {
-        action: "ping",
+      const response = await defaultTabMessenger.sendToTab<
+        CollectMessage,
+        CollectResponse
+      >(tab.id, {
+        action: CollectMessageAction.PING,
         ip,
       });
 
-      if (!response?.success) {
+      if (!response?.success || !response?.pingResult) {
         const message = this.getResponseMessage(response);
         this.setStatus(PopupStatusType.WARN, message);
         this.log(message, PopupStatusType.WARN);
@@ -805,12 +856,22 @@ export class PopupController {
         return;
       }
 
-      const message =
-        typeof response.message === "string" && response.message.trim() !== ""
-          ? response.message
-          : output.value;
+      if (this.currentDiagnosticsMode === DiagnosticsMode.INTERNAL) {
+        void SessionStorageService.save(
+          LAST_INTERNAL_PING_TEST_STORAGE_KEY,
+          response.pingResult
+        );
+        this.currentInternalPingResult = response.pingResult;
+      } else {
+        void SessionStorageService.save(
+          LAST_EXTERNAL_PING_TEST_STORAGE_KEY,
+          response.pingResult
+        );
+        this.currentExternalPingResult = response.pingResult;
+      }
 
-      output.value = message;
+      output.value = response.pingResult.message;
+
       this.setStatus(
         PopupStatusType.OK,
         translator.t("popup_diagnostics_ping_success")
@@ -819,6 +880,7 @@ export class PopupController {
         translator.t("popup_diagnostics_ping_success"),
         PopupStatusType.OK
       );
+
       this.setCopyResultButtonEnabled(true);
     } catch (error) {
       const message = this.getErrorMessage(error);
@@ -850,11 +912,11 @@ export class PopupController {
   }
 
   private async checkPendingErrors(): Promise<void> {
-    const pendingAuthError = await StorageService.get<string>(
+    const pendingAuthError = await SessionStorageService.get<string>(
       PENDING_AUTH_ERROR_STORAGE_KEY
     );
     if (pendingAuthError !== null && pendingAuthError !== "") {
-      await StorageService.remove(PENDING_AUTH_ERROR_STORAGE_KEY);
+      await SessionStorageService.remove(PENDING_AUTH_ERROR_STORAGE_KEY);
       this.setStatus(PopupStatusType.WARN, pendingAuthError);
     }
   }
@@ -904,15 +966,31 @@ export class PopupController {
     PopupView.updateField("dhcpSecondaryDns", null);
     PopupView.updateField("dhcpLeaseTimeMode", null);
     PopupView.updateField("dhcpLeaseTime", null);
+    PopupView.updateField("upnpEnabled", null);
+    PopupView.updateField("routerVersion", null);
+    PopupView.updateField("tr069Url", null);
     for (const band of ["24ghz", "5ghz", "cable"] as const) {
       this.clearTopologyBand(band);
+    }
+    const select = document.querySelector(
+      "#popup-diagnostics-device-select"
+    ) as HTMLSelectElement | null;
+    if (select) {
+      select.innerHTML = "";
+      select.disabled = true;
+    }
+    const output = document.querySelector(
+      "#popup-diagnostics-output"
+    ) as HTMLTextAreaElement | null;
+    if (output) {
+      output.value = "";
     }
     PopupView.clearLogs();
     this.persistedLogs = [];
     void this.persistUiState();
     const storageKey = this.getTabStorageKey(LAST_DATA_STORAGE_KEY);
     if (storageKey !== null) {
-      void StorageService.remove(storageKey);
+      void SessionStorageService.remove(storageKey);
     }
   }
 
@@ -1043,7 +1121,7 @@ export class PopupController {
     }
 
     try {
-      const model = await StorageService.get<string>(storageKey);
+      const model = await SessionStorageService.get<string>(storageKey);
       this.routerModel =
         typeof model === "string" && model.trim() !== "" ? model : null;
       routerModelElement.textContent =
@@ -1173,7 +1251,7 @@ export class PopupController {
 
         if (this.activeTabId !== null) {
           void chrome.tabs.sendMessage(this.activeTabId, {
-            action: "fillLoginFields",
+            action: ContentPageMessageAction.FILL_LOGIN_FIELDS,
             credentials: { username: cred.username, password: cred.password },
           });
         }

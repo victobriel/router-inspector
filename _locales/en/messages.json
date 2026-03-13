@@ -135,6 +135,10 @@
     "message": "Ping test completed successfully",
     "description": "Message shown when diagnostics ping is completed successfully."
   },
+  "popup_diagnostics_ping_error": {
+    "message": "Ping test failed",
+    "description": "Message shown when diagnostics ping is completed with errors."
+  },
   "popup_diagnostics_mode_internal": {
     "message": "Internal",
     "description": "Label for diagnostics mode internal."

@@ -9,3 +9,15 @@ export enum ThemeChoice {
   DARK = "dark",
   SYSTEM = "system",
 }
+
+export enum ContentPageMessageAction {
+  SHOW_OVERLAY = "showOverlay",
+  HIDE_OVERLAY = "hideOverlay",
+  TOGGLE_OVERLAY = "toggleOverlay",
+  FILL_LOGIN_FIELDS = "fillLoginFields",
+}
+
+export type ContentPageMessage = {
+  action: ContentPageMessageAction;
+  credentials?: { username: string; password: string };
+};

@@ -28,9 +28,7 @@ export class BookmarksService {
     await this.storage.save(BOOKMARKS_STORAGE_KEY, store);
   }
 
-  public async listByModel(
-    model: string
-  ): Promise<ModelBookmarks | null> {
+  public async listByModel(model: string): Promise<ModelBookmarks | null> {
     const store = await this.loadStore();
     const entry = store[model];
     return entry ?? null;
@@ -40,8 +38,7 @@ export class BookmarksService {
     model: string,
     credential: CredentialBookmark
   ): Promise<
-    | { kind: "ok"; entry: ModelBookmarks }
-    | { kind: "max_reached"; max: number }
+    { kind: "ok"; entry: ModelBookmarks } | { kind: "max_reached"; max: number }
   > {
     const store = await this.loadStore();
     const existing = store[model] ?? {
@@ -87,7 +84,10 @@ export class BookmarksService {
       return null;
     }
 
-    const entry: ModelBookmarks = { model: existing.model, credentials: updated };
+    const entry: ModelBookmarks = {
+      model: existing.model,
+      credentials: updated,
+    };
     store[model] = entry;
     await this.saveStore(store);
     return entry;
@@ -107,4 +107,3 @@ export class BookmarksService {
 }
 
 export const defaultBookmarksService = new BookmarksService(defaultStorage);
-

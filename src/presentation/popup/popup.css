@@ -455,6 +455,7 @@ h1 {
 }
 
 .popup-btn-copy-result {
+  border: 1px solid var(--ri-border);
 }
 
 /* ─── Icons ──────────────────────────────────────────────────────────────── */

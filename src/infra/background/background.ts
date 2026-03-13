@@ -6,9 +6,10 @@ import {
   ExtractionResultSchema,
   type ExtractionResult,
 } from "../../domain/schemas/validation.js";
-import { StorageService } from "../storage/StorageService.js";
 
 import type { CollectResponse } from "../../application/types/index.js";
+import { defaultTabMessenger } from "../tabs/ChromeTabMessenger.js";
+import { SessionStorageService } from "../storage/SessionStorageService.js";
 
 class ExtensionManager {
   public static async saveLastExtractionData(
@@ -36,7 +37,7 @@ class ExtensionManager {
 
     const storageKey = `${LAST_DATA_STORAGE_KEY}:${String(tabId)}`;
     const value: ExtractionResult = parsed.data;
-    await StorageService.save(storageKey, value, 24 * 60 * 1000);
+    await SessionStorageService.save(storageKey, value, 24 * 60 * 1000);
 
     return { success: true, data: value };
   }
@@ -57,14 +58,14 @@ class ExtensionManager {
     }
 
     const storageKey = `${ROUTER_MODEL_STORAGE_KEY}:${String(tabId)}`;
-    await StorageService.save(storageKey, model);
+    await SessionStorageService.save(storageKey, model);
 
     return { success: true };
   }
 
   public static async showOverlay(tabId: number): Promise<CollectResponse> {
     try {
-      await chrome.tabs.sendMessage(tabId, { action: "showOverlay" });
+      await defaultTabMessenger.sendToTab(tabId, { action: "showOverlay" });
       return { success: true };
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unknown error";

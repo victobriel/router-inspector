@@ -3,9 +3,9 @@ import {
   UI_STATE_STORAGE_KEY,
 } from "./constants/index.js";
 import type { IStorage } from "./ports/IStorage.js";
-import { defaultStorage } from "../infra/storage/StorageService.js";
 import type { PopupStatusType } from "./types/index.js";
 import type { ExtractionResult } from "../domain/schemas/validation.js";
+import { defaultSessionStorageService } from "../infra/storage/SessionStorageService.js";
 
 export interface PopupStatusState {
   type: PopupStatusType;
@@ -112,5 +112,5 @@ export class PopupUiStateService {
 }
 
 export const defaultPopupUiStateService = new PopupUiStateService(
-  defaultStorage
+  defaultSessionStorageService
 );

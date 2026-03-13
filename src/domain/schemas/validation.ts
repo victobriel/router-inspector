@@ -1,5 +1,10 @@
 import { z } from "zod";
 
+export enum DiagnosticsMode {
+  INTERNAL = "internal",
+  EXTERNAL = "external",
+}
+
 export type ValidationIssue = z.ZodIssue;
 
 export type ValidationResult<T> =
@@ -111,20 +116,51 @@ export const ExtractionResultSchema = z.object({
   tr069Url: z.string().optional(),
 });
 
+export enum CollectMessageAction {
+  AUTHENTICATE = "authenticate",
+  COLLECT = "collect",
+  PING = "ping",
+}
+
 export const CollectMessageSchema = z.object({
-  action: z.enum(["authenticate", "collect", "ping"], "Invalid action type"),
+  action: z.enum(
+    [
+      CollectMessageAction.AUTHENTICATE,
+      CollectMessageAction.COLLECT,
+      CollectMessageAction.PING,
+    ],
+    "Invalid action type"
+  ),
   credentials: z
     .object({
       username: z.string(),
       password: z.string(),
     })
     .optional(),
-  ip: z.string().optional(),
+  ip: z.ipv4().optional(),
+});
+
+export const PingTestResultSchema = z.object({
+  ip: z.ipv4(),
+  bytes: z.number(),
+  ttl: z.number(),
+  time: z.array(z.number()),
+  sequence: z.array(z.number()),
+  packets: z.object({
+    transmitted: z.number(),
+    received: z.number(),
+    loss: z.number(),
+    min: z.number(),
+    avg: z.number(),
+    max: z.number(),
+  }),
+  message: z.string(),
 });
 
 export type Credentials = z.infer<typeof CredentialsSchema>;
 export type CollectMessage = z.infer<typeof CollectMessageSchema>;
 export type ExtractionResult = z.infer<typeof ExtractionResultSchema>;
+export type PingTestResult = z.infer<typeof PingTestResultSchema>;
 
 export function validateCredentials(
   raw: unknown

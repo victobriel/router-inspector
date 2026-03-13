@@ -5,6 +5,7 @@ import {
   type CollectMessage,
 } from "../domain/schemas/validation.js";
 import { RouterFactory } from "../infra/router/RouterFactory.js";
+import { SessionStorageService } from "../infra/storage/SessionStorageService.js";
 
 export class CollectionService {
   public static async handleCollect(
@@ -33,16 +34,19 @@ export class CollectionService {
         const { username, password } = CredentialsSchema.parse(credentials);
 
         const loginTime = Date.now();
-        sessionStorage.setItem("router_login_pending", "true");
-        sessionStorage.setItem("router_login_time", loginTime.toString());
+        await SessionStorageService.save("router_login_pending", "true");
+        await SessionStorageService.save(
+          "router_login_time",
+          loginTime.toString()
+        );
 
         router.authenticate({ username, password });
 
         const authRedirected = await this.waitForAuthRedirect(router, 1000);
 
         if (!authRedirected && !router.isAuthenticated()) {
-          sessionStorage.removeItem("router_login_pending");
-          sessionStorage.removeItem("router_login_time");
+          await SessionStorageService.remove("router_login_pending");
+          await SessionStorageService.remove("router_login_time");
 
           return {
             success: false,
@@ -76,7 +80,8 @@ export class CollectionService {
 
         return {
           success: true,
-          message: result,
+          message: "Request timed out.",
+          pingResult: result,
         };
       },
     };

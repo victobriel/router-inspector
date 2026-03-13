@@ -13,4 +13,3 @@ export interface ITabMessenger {
     message: TRequest
   ): Promise<TResponse>;
 }
-

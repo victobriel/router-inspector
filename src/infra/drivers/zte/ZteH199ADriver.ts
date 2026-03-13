@@ -1,22 +1,25 @@
 import { BaseRouter } from "../../router/BaseRouter.js";
 import {
   ExtractionResultSchema,
+  PingTestResultSchema,
   type ButtonConfig,
   type Credentials,
   type ExtractionResult,
+  type PingTestResult,
 } from "../../../domain/schemas/validation.js";
 import { DomService } from "../../dom/DomService.js";
 import type { TopologyBand, TopologyClient } from "../shared/types.js";
 import {
-  DHCP_CONTAINER_WAIT_MS,
+  DHCP_LAN_ALLOCATED_ADDRESS_MAX_WAIT_MS,
+  TOPOLOGY_CLIENTS_LOAD_MAX_WAIT_MS,
   TOPOLOGY_POPUP_SETTLE_MS,
-  TOPOLOGY_POPUP_WAIT_MS,
 } from "./constants.js";
 import {
   ZteH199ALoginSelectors,
   ZteH199ASelectors as Selectors,
 } from "./ZteH199ASelectors.js";
 import type { ITopologySectionParser } from "../shared/TopologySectionParser.js";
+import type { DiagnosticsMode } from "../../../domain/schemas/validation.js";
 
 export class ZteH199ADriver extends BaseRouter {
   private readonly s = Selectors;
@@ -184,7 +187,7 @@ export class ZteH199ADriver extends BaseRouter {
       await Promise.race([
         this.waitForElement(
           this.s.topologyPopupWaitRows,
-          TOPOLOGY_POPUP_WAIT_MS
+          TOPOLOGY_CLIENTS_LOAD_MAX_WAIT_MS
         ),
         this.delay(TOPOLOGY_POPUP_SETTLE_MS),
       ]).catch(() => {});
@@ -429,7 +432,7 @@ export class ZteH199ADriver extends BaseRouter {
     await this.clickElementAndWait(
       this.s.lanContainer,
       this.s.dhcpServerContainer,
-      DHCP_CONTAINER_WAIT_MS
+      DHCP_LAN_ALLOCATED_ADDRESS_MAX_WAIT_MS
     );
     await this.clickElementAndWait(
       this.s.dhcpServerContainer,
@@ -560,7 +563,91 @@ export class ZteH199ADriver extends BaseRouter {
     return !onLoginPage && internetTab instanceof HTMLElement;
   }
 
-  public async ping(ip: string): Promise<string> {
+  private parsePingTestResult(raw: string, ip: string): PingTestResult | null {
+    const lines = raw
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    const headerLine = lines.find((line) => line.startsWith("PING "));
+    if (!headerLine) return null;
+
+    const headerMatch = headerLine.match(
+      /PING\s+.*\(([^)]+)\):\s+(\d+)\s+data bytes/i
+    );
+    if (!headerMatch) return null;
+
+    const targetIp = headerMatch[1] || ip;
+    let bytes = Number(headerMatch[2]);
+
+    const replyLines = lines.filter((line) =>
+      line.toLowerCase().startsWith("reply from")
+    );
+
+    const times: number[] = [];
+    const sequences: number[] = [];
+    let ttl = 0;
+
+    if (replyLines.length > 0) {
+      replyLines.forEach((reply) => {
+        const replyMatch = reply.match(
+          /bytes=(\d+)\s+ttl=(\d+)\s+time=([\d.]+)ms\s+seq=(\d+)/i
+        );
+        if (replyMatch) {
+          bytes = Number(replyMatch[1]);
+          ttl = Number(replyMatch[2]);
+          times.push(Number(replyMatch[3]));
+          sequences.push(Number(replyMatch[4]));
+        }
+      });
+    }
+
+    const statsLine = lines.find((line) =>
+      line.toLowerCase().includes("packets transmitted")
+    );
+    const rttLine = lines.find((line) =>
+      line.toLowerCase().includes("min/avg/max")
+    );
+
+    if (!statsLine || !rttLine) return null;
+
+    const statsMatch = statsLine.match(
+      /(\d+)\s+packets transmitted,\s+(\d+)\s+packets received,\s+(\d+)% packet loss/i
+    );
+    const rttMatch = rttLine.match(
+      /min\/avg\/max\s*=\s*([\d.]+)\/([\d.]+)\/([\d.]+)/i
+    );
+
+    if (!statsMatch || !rttMatch) return null;
+
+    const transmitted = Number(statsMatch[1]);
+    const received = Number(statsMatch[2]);
+    const loss = Number(statsMatch[3]);
+    const min = Number(rttMatch[1]);
+    const avg = Number(rttMatch[2]);
+    const max = Number(rttMatch[3]);
+
+    const base = {
+      ip: targetIp,
+      bytes,
+      time: times,
+      sequence: sequences,
+      ttl,
+      packets: {
+        transmitted,
+        received,
+        loss,
+        min,
+        avg,
+        max,
+      },
+      message: raw,
+    };
+
+    return PingTestResultSchema.parse(base);
+  }
+
+  public async ping(ip: string): Promise<PingTestResult | null> {
     await this.clickElementAndWait(
       this.s.managementTab,
       this.s.diagnosticsContainer
@@ -584,53 +671,12 @@ export class ZteH199ADriver extends BaseRouter {
     await this.waitForDisappearance(this.s.pingWaiting, 30000);
 
     const result = DomService.getOptionalValue(this.s.pingResult);
-    if (!result) {
-      return "Ping failed";
-    }
 
-    return result;
-  }
+    if (!result) return null;
 
-  private async waitForDisappearance(
-    selector: string,
-    timeoutMs = 10000
-  ): Promise<void> {
-    return new Promise((resolve, reject) => {
-      const hasDisappeared = (): boolean => {
-        const el = document.querySelector(selector) as HTMLElement | null;
-        if (!el) return true;
-        const style = window.getComputedStyle(el);
-        return style.display === "none" || style.visibility === "hidden";
-      };
+    const parsedResult = this.parsePingTestResult(result, ip);
 
-      if (hasDisappeared()) {
-        resolve();
-        return;
-      }
-
-      const observer = new MutationObserver(() => {
-        if (hasDisappeared()) {
-          observer.disconnect();
-          resolve();
-        }
-      });
-
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["style", "class"],
-      });
-
-      setTimeout(() => {
-        observer.disconnect();
-        reject(
-          new Error(
-            `Timeout: Element "${selector}" not disappeared after ${timeoutMs}ms`
-          )
-        );
-      }, timeoutMs);
-    });
+    return parsedResult;
   }
 
   public buttonElementConfig(): ButtonConfig | null {

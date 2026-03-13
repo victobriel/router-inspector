@@ -21,7 +21,7 @@ export class RouterFactory {
   }
 
   private static isZteH199A(title: string, body: string): boolean {
-    const indicators = ["h199a", "zxhn", "h199"];
+    const indicators = ["h199a", "h199"];
 
     for (const term of indicators) {
       if (title.includes(term) || body.includes(term)) {

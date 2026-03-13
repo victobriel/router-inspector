@@ -5,6 +5,8 @@ const ROUTER_MODEL_STORAGE_KEY = "detected_router_model";
 const PENDING_AUTH_ERROR_STORAGE_KEY = "pending_auth_error_message";
 const COPY_TEXT_TEMPLATE_STORAGE_KEY = "copy_text_template";
 const LAST_EXTERNAL_IP_STORAGE_KEY = "last_external_ip";
+const LAST_INTERNAL_PING_TEST_STORAGE_KEY = "last_internal_ping_ip";
+const LAST_EXTERNAL_PING_TEST_STORAGE_KEY = "last_external_ping_ip";
 const MAX_BOOKMARK_CREDENTIALS = 6;
 
 export {
@@ -15,5 +17,7 @@ export {
   PENDING_AUTH_ERROR_STORAGE_KEY,
   COPY_TEXT_TEMPLATE_STORAGE_KEY,
   LAST_EXTERNAL_IP_STORAGE_KEY,
+  LAST_INTERNAL_PING_TEST_STORAGE_KEY,
+  LAST_EXTERNAL_PING_TEST_STORAGE_KEY,
   MAX_BOOKMARK_CREDENTIALS,
 };

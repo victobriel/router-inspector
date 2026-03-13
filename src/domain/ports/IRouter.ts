@@ -2,6 +2,7 @@ import type {
   ButtonConfig,
   Credentials,
   ExtractionResult,
+  PingTestResult,
 } from "../schemas/validation.js";
 
 /**
@@ -18,5 +19,5 @@ export interface IRouter {
   extract(): Promise<ExtractionResult>;
   buttonElementConfig(): ButtonConfig | null;
   isAuthenticated(): boolean;
-  ping(ip: string): Promise<string>;
+  ping(ip: string): Promise<PingTestResult | null>;
 }

@@ -1,10 +1,14 @@
-import type { ExtractionResult } from "../../domain/schemas/validation.js";
+import type {
+  ExtractionResult,
+  PingTestResult,
+} from "../../domain/schemas/validation.js";
 
 /** Application-level response for collect/authenticate operations. */
 export interface CollectResponse {
   success: boolean;
   message?: string;
   data?: ExtractionResult;
+  pingResult?: PingTestResult;
 }
 
 /** Status type for popup UI feedback. */

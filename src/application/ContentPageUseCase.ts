@@ -2,7 +2,6 @@ import { DomService } from "../infra/dom/DomService.js";
 import { RouterFactory } from "../infra/router/RouterFactory.js";
 import { StorageService } from "../infra/storage/StorageService.js";
 
-import { CollectionService } from "./CollectionService.js";
 import {
   BOOKMARKS_STORAGE_KEY,
   PENDING_AUTH_ERROR_STORAGE_KEY,
@@ -10,7 +9,11 @@ import {
 
 import type { BookmarkStore } from "./types/index.js";
 import type { Router } from "../domain/models/Router.js";
-import type { ButtonConfig } from "../domain/schemas/validation.js";
+import {
+  CollectMessageAction,
+  type ButtonConfig,
+} from "../domain/schemas/validation.js";
+import { CollectionService } from "./CollectionService.js";
 
 /**
  * Application use case: bootstrap content script on router page.
@@ -67,7 +70,7 @@ export class ContentPageUseCase {
     // 10 seconds is the maximum time allowed for authentication
     if (elapsed < 10 * 1000) {
       const result = await CollectionService.handleCollect({
-        action: "collect",
+        action: CollectMessageAction.COLLECT,
       });
 
       if (result.success && result.data) {
@@ -124,7 +127,7 @@ export class ContentPageUseCase {
       }
 
       const result = await CollectionService.handleCollect({
-        action: "authenticate",
+        action: CollectMessageAction.AUTHENTICATE,
         credentials: { username, password },
       });
 
