@@ -106,14 +106,12 @@ export abstract class BaseRouter implements IRouter {
 
     await this.delay(BaseRouter.CLICK_SETTLE_MS);
 
-    const elementPromise = this.waitForElement(targetSelector);
-    const resolved = await Promise.race([
-      elementPromise.then(() => true),
-      this.delay(maxWaitMs).then(() => false),
-    ]);
-
-    if (!resolved) {
-      await elementPromise;
+    try {
+      await this.waitForElement(targetSelector, maxWaitMs);
+    } catch {
+      throw new Error(
+        `Timeout: Element "${targetSelector}" did not appear after ${maxWaitMs}ms (router may be slow or overloaded)`
+      );
     }
   }
 
