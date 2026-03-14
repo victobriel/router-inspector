@@ -395,14 +395,14 @@ export class ZteH199Driver extends BaseRouter {
     for (let offset = 0; offset < count; offset++) {
       const index = startIndex + offset;
 
-      const enabledSelector = `#Enable1\\:${index}`;
-      const enabled = DomService.getInputElement(enabledSelector).checked;
-
       const ssidNameSelector = `#ESSID\\:${index}`;
       const ssidName = DomService.getOptionalValue(ssidNameSelector) ?? "";
       if (!ssidName.trim()) {
         continue;
       }
+
+      const enabledSelector = `#Enable1\\:${index}`;
+      const enabled = DomService.getInputElement(enabledSelector).checked;
 
       const passwordSelector = `#KeyPassphrase\\:${index}`;
       const ssidPassword = DomService.getOptionalValue(passwordSelector) ?? "";
